@@ -62,7 +62,7 @@ namespace UrbanFormEHub
 
             if (!carbcon.IsNullOrDefault())
             {
-                Ehub ehub = new Ehub(path, carbmin,carbcon);
+                Ehub ehub = new Ehub(path, carbmin, carbcon);
             }
             else
             {
@@ -92,7 +92,7 @@ namespace UrbanFormEHub
         /// </summary>
         public override Guid ComponentGuid
         {
-            get { return new Guid("{9e151ae4-1dea-406e-9280-01e51b28c8aa}"); }
+            get { return new Guid("30593d00-398a-4c61-9844-7f5ffececb85"); }
         }
     }
 }

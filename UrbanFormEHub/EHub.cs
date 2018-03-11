@@ -22,13 +22,20 @@ namespace UrbanFormEHub
         internal double CAPEX;              // capital cost. levelized.
 
         // Technology sizing
-        internal double[] x_pv;             // pv sizing [m2]
-        internal double x_bat;              // battery 
-        internal double x_hp;               // heat pump. assume it reaches peak heat temperatures as simplification.
-        internal double x_tes;              // thermal storage
-        internal double x_chp;              // combined heat and power
         internal double x_ac;               // air condition
-        internal double x_boi;              // gas boiler
+        internal double[] x_pv;             // pv sizing [m2]
+        internal double[] x_st;             // st sizing [m2]
+        internal double x_hp_s;               // heat pump. assume it reaches peak heat temperatures as simplification.
+        internal double x_chp_s;              // combined heat and power
+        internal double x_boi_s;              // gas boiler
+        internal double x_hp_m;               // heat pump. assume it reaches peak heat temperatures as simplification.
+        internal double x_chp_m;              // combined heat and power
+        internal double x_boi_m;              // gas boiler
+        internal double x_hp_l;               // heat pump. assume it reaches peak heat temperatures as simplification.
+        internal double x_chp_l;              // combined heat and power
+        internal double x_boi_l;              // gas boiler
+        internal double x_bat;              // battery 
+        internal double x_tes;              // thermal storage
 
         // Operation. Time resolved.
         internal double[] x_elecpur;        // purchase from grid
@@ -36,23 +43,44 @@ namespace UrbanFormEHub
         internal double[] x_batdischarge;   // battery discharge
         internal double[] x_batcharge;      // battery charge
         internal double[] x_batsoc;         // battery state of charge
-        internal double[] x_tesdischarge;   // thermal energy storage (tes) discharge
-        internal double[] x_tescharge;      // tes charge
         internal double[] x_tessoc;         // tes state of charge
-        internal double[] x_hp_op;          // heat pump operation
-        internal double[] x_boi_op;         // boiler operation
-        internal double[] x_chp_op_e;       // chp operation electricity
-        internal double[] x_chp_op_h;       // chp operation heat
-        internal double[] x_chp_dump;       // chp heat dumped
+        internal double[] x_tesdischarge_dhw;   // thermal energy storage (tes) discharge
+        internal double[] x_tescharge_dhw;      // tes charge
+        internal double[] x_tesdischarge_sh;   // thermal energy storage (tes) discharge
+        internal double[] x_tescharge_sh;      // tes charge
+        internal double[] x_st_optot_dhw;      // total st dhw operation
+        internal double[] x_st_optot_sh;       // total st sh operation
+        internal double[][] x_st_op_dhw;      // total st dhw operation
+        internal double[][] x_st_op_sh;       // total st sh operation
+        internal double[] x_hp_s_op_dhw;          // heat pump operation
+        internal double[] x_boi_s_op_dhw;         // boiler operation
+        internal double[] x_chp_s_op_dhw;       // chp operation heat
+        internal double[] x_chp_s_dump_dhw;       // chp heat dumped
+        internal double[] x_hp_m_op_dhw;          // heat pump operation
+        internal double[] x_boi_m_op_dhw;         // boiler operation
+        internal double[] x_chp_m_op_dhw;       // chp operation heat
+        internal double[] x_chp_m_dump_dhw;       // chp heat dumped
+        internal double[] x_hp_l_op_dhw;          // heat pump operation
+        internal double[] x_boi_l_op_dhw;         // boiler operation
+        internal double[] x_chp_l_op_dhw;       // chp operation heat
+        internal double[] x_chp_l_dump_dhw;       // chp heat dumped
+        internal double[] x_hp_s_op_sh;          // heat pump operation
+        internal double[] x_boi_s_op_sh;         // boiler operation
+        internal double[] x_chp_s_op_sh;       // chp operation heat
+        internal double[] x_chp_s_dump_sh;       // chp heat dumped
+        internal double[] x_hp_m_op_sh;          // heat pump operation
+        internal double[] x_boi_m_op_sh;         // boiler operation
+        internal double[] x_chp_m_op_sh;       // chp operation heat
+        internal double[] x_chp_m_dump_sh;       // chp heat dumped
+        internal double[] x_hp_l_op_sh;          // heat pump operation
+        internal double[] x_boi_l_op_sh;         // boiler operation
+        internal double[] x_chp_l_op_sh;       // chp operation heat
+        internal double[] x_chp_l_dump_sh;       // chp heat dumped
+        internal double[] x_chp_s_op_e;       // chp operation electricity
+        internal double[] x_chp_m_op_e;       // chp operation electricity
+        internal double[] x_chp_l_op_e;       // chp operation electricity
 
         internal double[] b_pvprod;     // total pv production
-        internal double[] b_pvprod_Roof;// pv production roof
-        internal double[] b_pvprod_E;   // pv prod East
-        internal double[] b_pvprod_S_a; // pv prod South A
-        internal double[] b_pvprod_S_b; // pv prod South B
-        internal double[] b_pvprod_W_a; // pv prod West A
-        internal double[] b_pvprod_W_b; // pv prod West B
-
     }
 
 
@@ -73,26 +101,31 @@ namespace UrbanFormEHub
         // economies of scale for energy technologies, like in george's paper
         // separate DHW and SH. that means, 2 different COP / efficiency curves for everything that is supply temperature dependant (ASHP)
 
-
-        //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-
-        // get domestic hot water from pre-generated profiles, with stochasticity inside. scale up per m2 floor area
-
         // add AirCon sizing to capacity cost
 
-        // binaries for fix cost?
-
-        //check data for ST (cost etc). check o&m cost
-
-        
-
-        // network cost and losses george thesis
-
-
+        // binaries for fix cost
 
         // minimum partload, not x % of capacity, but x % of minimum capacity, essentially a constant.
 
+
+        //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+        // Take out partload... 
+        // reduce to 3 weeks (winter, spring ,summer), and mirror for the second half of the year? via constraints? so soc[end] = soc[0]
+        // use 12 average days
+        // aggregate dhw and sh
+
+        // get domestic hot water from pre-generated profiles, with stochasticity inside. scale up per m2 floor area
+
+        //check data for ST (cost etc). check o&m cost
+
+        // network cost and losses
+
         // lower and upper bounds of energy technologies according to george's thesis
+
+
+
+
 
         #region global variables and constants
 
@@ -111,7 +144,7 @@ namespace UrbanFormEHub
         internal const double pv_T_aNCOT = 20;          // reference Temperature for NCOT
         internal const double pv_P_NCOT = 800;          // irradiation of NCOT
         internal const double pv_beta_ref = 0.004;      // temperature coefficient
-        internal const double pv_n_ref = 0.2;           // PV efficiency under NCOT     //ISE freiburg has 22,6 CIGS. 
+        internal const double pv_n_ref = 0.15;           // PV efficiency under NCOT     //ISE freiburg has 22,6 CIGS. 
 
         // ST Solar Thermal data
         internal const double st_Frta = 0.68;
@@ -146,19 +179,19 @@ namespace UrbanFormEHub
         internal const double ac_cop = 3;                   // η=3
 
         // Battery data
-        internal const double bat_ch_eff = 0.92;            // Battery charging efficiency
-        internal const double bat_disch_eff = 0.92;         // Battery discharging efficiency
+        internal const double bat_ch_eff = 0.9;            // Battery charging efficiency
+        internal const double bat_disch_eff = 0.9;         // Battery discharging efficiency
         internal const double bat_decay = 0.001;            // Battery hourly decay
-        internal const double bat_max_ch = 0.3;             // Battery max charging rate. 
-        internal const double bat_max_disch = 0.33;         // Battery max discharging rate. 
+        internal const double bat_max_ch = 0.4;             // Battery max charging rate. 
+        internal const double bat_max_disch = 0.4;         // Battery max discharging rate. 
         internal const double bat_min_state = 0.3;          // Battery minimum state of charge. 
 
         // Thermal Energy Storage tank data
         internal const double tes_ch_eff = 0.9;             // Thermal energy storage (TES) charging efficiency
         internal const double tes_disch_eff = 0.9;          // TES discharging efficiency
-        internal const double tes_decay = 0.001;            // TES heat loss
-        internal const double tes_max_ch = 0.25;            // TES max charging rate
-        internal const double tes_max_disch = 0.25;         // TES max discharging rate
+        internal const double tes_decay = 0.01;            // TES heat loss
+        internal const double tes_max_ch = 0.4;            // TES max charging rate
+        internal const double tes_max_disch = 0.4;         // TES max discharging rate
 
 
 
@@ -176,14 +209,14 @@ namespace UrbanFormEHub
         internal const double lca_boiler = 0.0;             // per kW installed
 
 
-        internal const double lca_gas = 0.228;                // natural gas from grid, per kWh
+        internal const double lca_gas = 0.198;                // natural gas from grid, per kWh
 
 
         // Economic data
-        internal const double intrate = 0.08;
+        internal const double intrate = 0.04;
 
-        internal const double CostPV = 290;             // Cost PV per m2. assume cheap production of CIGS
-        internal const double CostST = 150;
+        internal const double CostPV = 400;             // Cost PV per m2. assume cheap production of CIGS
+        internal const double CostST = 1000;
         internal const double CostHP_s = 1530;            // Cost ASHP per kW installed, < 50 kW
         internal const double CostHP_m = 910;            // Cost ASHP per kW installed, 50 - 200 kW
         internal const double CostHP_l = 770;            // Cost ASHP per kW installed, > 200 kW
@@ -195,10 +228,10 @@ namespace UrbanFormEHub
         internal const double CostCHP_l = 790;           // Cost CHP per kW installed, > 200 kW
         internal const double CostAC = 360;             // AirCon capital cost per kW
         internal const double CostBat = 2000;            // Battery capital cost per kWh
-        internal const double CostTES = 12.5;            // TES capital cost per kWh
+        internal const double CostTES = 150;            // TES capital cost per kWh
 
         internal const double fixCostPV = 5750;
-        internal const double fixCostST = 3000;    
+        internal const double fixCostST = 4000;
         internal const double fixCostHP_s = 6830;
         internal const double fixCostHP_m = 43130;
         internal const double fixCostHP_l = 87840;
@@ -267,13 +300,13 @@ namespace UrbanFormEHub
 
         internal static double c_pv_om = 0.0;                   // operating maintenance cost per kWh
         internal static double c_st_om = 0.0;
-        internal static double c_hp_om = 0.1;
-        internal static double c_boi_om = 0.01;
-        internal static double c_chp_om = 0.021;
+        internal static double c_hp_om = 0.0;
+        internal static double c_boi_om = 0.0;
+        internal static double c_chp_om = 0.0;
         internal static double c_tes_om = 0.0;
         internal static double c_bat_om = 0.0;
 
-        internal static double c_gas = 0.09;                    // natural gas per kWh
+        internal static double c_gas = 0.113;                    // natural gas per kWh
 
         internal const double M = 9999999;  // big M method
 
@@ -319,7 +352,7 @@ namespace UrbanFormEHub
         /// Create new energy hub object.
         /// </summary>
         /// <param name="path">Path to inputs.</param>
-        internal Ehub(string path, bool crbmin, double? crbconstr=null)
+        internal Ehub(string path, bool crbmin, double? crbconstr = null)
         {
             // ===================================================================
             // Pre-processing. Loading profiles etc.
@@ -347,16 +380,21 @@ namespace UrbanFormEHub
 
 
             //solve
-            this.outputs= this.ehubmodel_multi(crbmin, crbconstr);
+            this.outputs = this.ehubmodel_dhw(crbmin, crbconstr);
 
 
         }
 
 
-   
 
 
-        private Ehub_outputs ehubmodel_multi(bool bln_mincarbon, double? carbonconstraint = null)
+        /// <summary>
+        /// ehub with domestic hot water and space heating separate. and min partload
+        /// </summary>
+        /// <param name="bln_mincarbon"></param>
+        /// <param name="carbonconstraint"></param>
+        /// <returns></returns>
+        private Ehub_outputs ehubmodel_dhw_minpartload(bool bln_mincarbon, double? carbonconstraint = null)
         {
 
             //_________________________________________________________________________
@@ -412,7 +450,7 @@ namespace UrbanFormEHub
             //AC - not variable, since only one cooling tech
             double x_AC = this.b_peakcool;                                  // sizing in kW. not a variable
             double[] x_ac_op = new double[this.horizon];                  // operation in kWh. not variable.
-            double y_ac = (x_AC > 0) ? 1 : 0;   
+            double y_ac = (x_AC > 0) ? 1 : 0;
 
             // PV
             INumVar[] x_pv = new INumVar[solarspots];                          // m2 installed per patch (pvspots)
@@ -470,21 +508,21 @@ namespace UrbanFormEHub
 
             // CHP
             INumVar x_chp_s = cpl.NumVar(5, 50);                          // capacity, in kW
-            INumVar[] y_chp_s = new INumVar[this.horizon];              //binary for min part load
+            INumVar[] y_chp_op_s = new INumVar[this.horizon];              //binary for min part load
             INumVar[] x_chp_s_op_e = new INumVar[this.horizon];               // operation electricity, in kWh
             INumVar[] x_chp_s_op_dhw = new INumVar[this.horizon];               // operation heat, in kWh
             INumVar[] x_chp_s_dump_dhw = new INumVar[this.horizon];               // dumping heat, in kWh
             INumVar[] x_chp_s_op_sh = new INumVar[this.horizon];               // operation heat, in kWh
             INumVar[] x_chp_s_dump_sh = new INumVar[this.horizon];               // dumping heat, in kWh
             INumVar x_chp_m = cpl.NumVar(50, 200);                          // capacity, in kW
-            INumVar[] y_chp_m = new INumVar[this.horizon];              //binary for min part load
+            INumVar[] y_chp_op_m = new INumVar[this.horizon];              //binary for min part load
             INumVar[] x_chp_m_op_e = new INumVar[this.horizon];               // operation electricity, in kWh
             INumVar[] x_chp_m_op_dhw = new INumVar[this.horizon];               // operation heat, in kWh
             INumVar[] x_chp_m_dump_dhw = new INumVar[this.horizon];               // dumping heat, in kWh
             INumVar[] x_chp_m_op_sh = new INumVar[this.horizon];               // operation heat, in kWh
             INumVar[] x_chp_m_dump_sh = new INumVar[this.horizon];               // dumping heat, in kWh
             INumVar x_chp_l = cpl.NumVar(200, System.Double.MaxValue);      // capacity, in kW
-            INumVar[] y_chp_l = new INumVar[this.horizon];              //binary for min part load
+            INumVar[] y_chp_op_l = new INumVar[this.horizon];              //binary for min part load
             INumVar[] x_chp_l_op_e = new INumVar[this.horizon];               // operation electricity, in kWh
             INumVar[] x_chp_l_op_dhw = new INumVar[this.horizon];               // operation heat, in kWh
             INumVar[] x_chp_l_dump_dhw = new INumVar[this.horizon];               // dumping heat, in kWh
@@ -515,7 +553,7 @@ namespace UrbanFormEHub
                 y1[t] = cpl.BoolVar();
                 x_purchase[t] = cpl.NumVar(0, System.Double.MaxValue);
                 x_feedin[t] = cpl.NumVar(0, System.Double.MaxValue);
-                
+
                 //x_ac_op[t] = cpl.NumVar(0, x_AC);
 
                 for (int i = 0; i < solarspots; i++)
@@ -529,9 +567,9 @@ namespace UrbanFormEHub
                 x_chp_s_op_e[t] = cpl.NumVar(0, System.Double.MaxValue);
                 x_chp_m_op_e[t] = cpl.NumVar(0, System.Double.MaxValue);
                 x_chp_l_op_e[t] = cpl.NumVar(0, System.Double.MaxValue);
-                y_chp_s[t] = cpl.BoolVar();
-                y_chp_m[t] = cpl.BoolVar();
-                y_chp_l[t] = cpl.BoolVar();
+                y_chp_op_s[t] = cpl.BoolVar();
+                y_chp_op_m[t] = cpl.BoolVar();
+                y_chp_op_l[t] = cpl.BoolVar();
 
                 x_hp_s_op_sh[t] = cpl.NumVar(0, System.Double.MaxValue);
                 x_boi_s_op_sh[t] = cpl.NumVar(0, System.Double.MaxValue);
@@ -570,7 +608,7 @@ namespace UrbanFormEHub
                 x_tes_ch_dhw[t] = cpl.NumVar(0, System.Double.MaxValue);
                 x_tes_dis_dhw[t] = cpl.NumVar(0, System.Double.MaxValue);
 
-                
+
                 x_bat_ch[t] = cpl.NumVar(0, System.Double.MaxValue);
                 x_bat_dis[t] = cpl.NumVar(0, System.Double.MaxValue);
 
@@ -589,7 +627,7 @@ namespace UrbanFormEHub
             // CONSTRAINTS
 
             //constraint, saying x_st[spot] + x_pv[spot] <= area[spot]
-            for (int i=0; i<solarspots; i++)
+            for (int i = 0; i < solarspots; i++)
             {
                 cpl.AddGe(b_solar_area[i], cpl.Sum(x_st[i], x_pv[i]));
             }
@@ -626,7 +664,7 @@ namespace UrbanFormEHub
                 elecadditionaldemand.AddTerm(1 / c_hp_eff_dhw[t], x_hp_s_op_dhw[t]);
                 elecadditionaldemand.AddTerm(1 / c_hp_eff_dhw[t], x_hp_m_op_dhw[t]);
                 elecadditionaldemand.AddTerm(1 / c_hp_eff_dhw[t], x_hp_l_op_dhw[t]);
-                cpl.AddEq(cpl.Diff(elecgeneration, cpl.Sum(c_ac_eff[t]*b_cool[t],elecadditionaldemand)), this.b_elec[t]);
+                cpl.AddEq(cpl.Diff(elecgeneration, cpl.Sum(c_ac_eff[t] * this.b_cool[t], elecadditionaldemand)), this.b_elec[t]);
 
 
                 // space heating must be met by boiler, hp, chp, st, and TES
@@ -679,7 +717,7 @@ namespace UrbanFormEHub
                     dhwadditionaldemand.AddTerm(1, x_st_dump_dhw[i][t]);
                 }
                 cpl.AddEq(cpl.Diff(dhwgeneration, dhwadditionaldemand), this.b_dhw[t]);
-             
+
                 //pv production must be greater or equal feedin
                 cpl.AddGe(pvproduction, x_feedin[t]);
 
@@ -687,9 +725,9 @@ namespace UrbanFormEHub
                 cpl.AddLe(x_purchase[t], cpl.Prod(M, y1[t]));
                 cpl.AddLe(x_feedin[t], cpl.Prod(M, cpl.Diff(1, y1[t])));
 
-                cpl.AddLe(x_chp_s_op_e[t], cpl.Prod(M, y_chp_s[t]));
-                cpl.AddLe(x_chp_m_op_e[t], cpl.Prod(M, y_chp_m[t]));
-                cpl.AddLe(x_chp_l_op_e[t], cpl.Prod(M, y_chp_l[t]));
+                cpl.AddLe(x_chp_s_op_e[t], cpl.Prod(M, y_chp_op_s[t]));
+                cpl.AddLe(x_chp_m_op_e[t], cpl.Prod(M, y_chp_op_m[t]));
+                cpl.AddLe(x_chp_l_op_e[t], cpl.Prod(M, y_chp_op_l[t]));
             }
 
 
@@ -711,15 +749,15 @@ namespace UrbanFormEHub
                     sttotal.AddTerm(Math.Pow(this.c_st_eff_sh[i][t], -1), x_st_op_sh[i][t]);
                     sttotal.AddTerm(Math.Pow(this.c_st_eff_dhw[i][t], -1), x_st_dump_dhw[i][t]);
                     sttotal.AddTerm(Math.Pow(this.c_st_eff_dhw[i][t], -1), x_st_op_dhw[i][t]);
-                    cpl.AddEq(cpl.Prod(this.a_solar[i][t] * 0.001,x_st[i]), sttotal);     // solar thermal production and dump is equal the solar potential of the sized m2 patch
+                    cpl.AddEq(cpl.Prod(this.a_solar[i][t] * 0.001, x_st[i]), sttotal);     // solar thermal production and dump is equal the solar potential of the sized m2 patch
                 }
-                cpl.AddLe(stdump, stutil);  //dumping must be smaller than utilization
+                //cpl.AddLe(stdump, stutil);  //dumping must be smaller than utilization
 
 
                 // CHP 
-                cpl.AddGe(x_chp_s_op_e[t], cpl.Prod(y_chp_s[t], c_chp_s_minload));
-                cpl.AddGe(x_chp_m_op_e[t], cpl.Prod(y_chp_m[t], c_chp_m_minload));
-                cpl.AddGe(x_chp_l_op_e[t], cpl.Prod(y_chp_l[t], c_chp_l_minload)); 
+                cpl.AddGe(x_chp_s_op_e[t], cpl.Prod(y_chp_op_s[t], c_chp_s_minload));
+                cpl.AddGe(x_chp_m_op_e[t], cpl.Prod(y_chp_op_m[t], c_chp_m_minload));
+                cpl.AddGe(x_chp_l_op_e[t], cpl.Prod(y_chp_op_l[t], c_chp_l_minload));
                 cpl.AddLe(x_chp_s_op_e[t], x_chp_s);
                 cpl.AddLe(x_chp_m_op_e[t], x_chp_m);
                 cpl.AddLe(x_chp_l_op_e[t], x_chp_l);
@@ -850,10 +888,21 @@ namespace UrbanFormEHub
                 // co2 emissions by purchase from grid and heat pump
                 a_co2.AddTerm((this.a_carbon[t] / 1000) * this.c_num_of_days[t], x_purchase[t]);
                 a_co2.AddTerm((this.a_carbon[t] / 1000) * this.c_num_of_days[t] * (1 / c_hp_eff_dhw[t]), x_hp_s_op_dhw[t]);
-
+                a_co2.AddTerm((this.a_carbon[t] / 1000) * this.c_num_of_days[t] * (1 / c_hp_eff_dhw[t]), x_hp_m_op_dhw[t]);
+                a_co2.AddTerm((this.a_carbon[t] / 1000) * this.c_num_of_days[t] * (1 / c_hp_eff_dhw[t]), x_hp_l_op_dhw[t]);
+                a_co2.AddTerm((this.a_carbon[t] / 1000) * this.c_num_of_days[t] * (1 / c_hp_eff_sh[t]), x_hp_s_op_sh[t]);
+                a_co2.AddTerm((this.a_carbon[t] / 1000) * this.c_num_of_days[t] * (1 / c_hp_eff_sh[t]), x_hp_m_op_sh[t]);
+                a_co2.AddTerm((this.a_carbon[t] / 1000) * this.c_num_of_days[t] * (1 / c_hp_eff_sh[t]), x_hp_l_op_sh[t]);
                 // co2 by natural gas
                 a_co2.AddTerm(lca_gas * this.c_num_of_days[t] * (1 / c_boi_eff), x_boi_s_op_dhw[t]);
+                a_co2.AddTerm(lca_gas * this.c_num_of_days[t] * (1 / c_boi_eff), x_boi_m_op_dhw[t]);
+                a_co2.AddTerm(lca_gas * this.c_num_of_days[t] * (1 / c_boi_eff), x_boi_l_op_dhw[t]);
+                a_co2.AddTerm(lca_gas * this.c_num_of_days[t] * (1 / c_boi_eff), x_boi_s_op_sh[t]);
+                a_co2.AddTerm(lca_gas * this.c_num_of_days[t] * (1 / c_boi_eff), x_boi_m_op_sh[t]);
+                a_co2.AddTerm(lca_gas * this.c_num_of_days[t] * (1 / c_boi_eff), x_boi_l_op_sh[t]);
                 a_co2.AddTerm(lca_gas * this.c_num_of_days[t] * (1 / c_chp_s_eff), x_chp_s_op_e[t]);
+                a_co2.AddTerm(lca_gas * this.c_num_of_days[t] * (1 / c_chp_m_eff), x_chp_m_op_e[t]);
+                a_co2.AddTerm(lca_gas * this.c_num_of_days[t] * (1 / c_chp_l_eff), x_chp_l_op_e[t]);
             }
 
             //for (int i = 0; i < pvspots - 6; i++)
@@ -918,7 +967,7 @@ namespace UrbanFormEHub
             {
                 OPEX.AddTerm(this.c_grid[t] * this.c_num_of_days[t], x_purchase[t]);
                 OPEX.AddTerm(-1.0 * this.c_feedin[t] * this.c_num_of_days[t], x_feedin[t]);
-                
+
                 for (int i = 0; i < solarspots; i++)
                 {
                     OPEX.AddTerm((c_pv_om * this.a_solar[i][t] * 0.001 * this.c_pv_eff[i][t] * this.c_num_of_days[t]), x_pv[i]);
@@ -957,7 +1006,7 @@ namespace UrbanFormEHub
                 OPEX.AddTerm(c_boi_om * this.c_num_of_days[t], x_boi_l_op_sh[t]);
                 OPEX.AddTerm(c_tes_om * this.c_num_of_days[t], x_tes_ch_sh[t]);
                 OPEX.AddTerm(c_tes_om * this.c_num_of_days[t], x_tes_dis_sh[t]);
-                
+
                 OPEX.AddTerm(c_bat_om * this.c_num_of_days[t], x_bat_ch[t]);
                 OPEX.AddTerm(c_bat_om * this.c_num_of_days[t], x_bat_dis[t]);
             }
@@ -1025,24 +1074,19 @@ namespace UrbanFormEHub
             outs.x_elecpur = new double[this.horizon];
             outs.x_feedin = new double[this.horizon];
             outs.b_pvprod = new double[this.horizon];
-            outs.b_pvprod_S_a = new double[this.horizon];
-            outs.b_pvprod_S_b = new double[this.horizon];
-            outs.b_pvprod_W_a = new double[this.horizon];
-            outs.b_pvprod_W_b = new double[this.horizon];
-            outs.b_pvprod_E = new double[this.horizon];
-            outs.b_pvprod_Roof = new double[this.horizon];
+
 
             outs.x_batcharge = new double[this.horizon];
             outs.x_batdischarge = new double[this.horizon];
             outs.x_batsoc = new double[this.horizon];
-            outs.x_tescharge = new double[this.horizon];
-            outs.x_tesdischarge = new double[this.horizon];
+            outs.x_tescharge_dhw = new double[this.horizon];
+            outs.x_tesdischarge_dhw = new double[this.horizon];
             outs.x_tessoc = new double[this.horizon];
-            outs.x_hp_op = new double[this.horizon];
-            outs.x_boi_op = new double[this.horizon];
-            outs.x_chp_op_e = new double[this.horizon];
-            outs.x_chp_op_h = new double[this.horizon];
-            outs.x_chp_dump = new double[this.horizon];
+            outs.x_hp_s_op_dhw = new double[this.horizon];
+            outs.x_boi_s_op_dhw = new double[this.horizon];
+            outs.x_chp_s_op_e = new double[this.horizon];
+            outs.x_chp_s_op_dhw = new double[this.horizon];
+            outs.x_chp_s_dump_dhw = new double[this.horizon];
 
             outs.x_pv = new double[this.b_solar_area.Length];
             for (int t = 0; t < this.horizon; t++)
@@ -1052,46 +1096,28 @@ namespace UrbanFormEHub
                 outs.x_batcharge[t] = cpl.GetValue(x_bat_ch[t]);
                 outs.x_batdischarge[t] = cpl.GetValue(x_bat_dis[t]);
                 outs.x_batsoc[t] = cpl.GetValue(x_bat_soc[t]);
-                outs.x_tescharge[t] = cpl.GetValue(x_tes_ch_dhw[t]);
-                outs.x_tesdischarge[t] = cpl.GetValue(x_tes_dis_dhw[t]);
+                outs.x_tescharge_dhw[t] = cpl.GetValue(x_tes_ch_dhw[t]);
+                outs.x_tesdischarge_dhw[t] = cpl.GetValue(x_tes_dis_dhw[t]);
                 outs.x_tessoc[t] = cpl.GetValue(x_tes_soc[t]);
-                outs.x_hp_op[t] = cpl.GetValue(x_hp_s_op_dhw[t]);
-                outs.x_boi_op[t] = cpl.GetValue(x_boi_s_op_dhw[t]);
-                outs.x_chp_op_e[t] = cpl.GetValue(x_chp_s_op_e[t]);
-                outs.x_chp_op_h[t] = cpl.GetValue(x_chp_s_op_dhw[t]);
-                outs.x_chp_dump[t] = cpl.GetValue(x_chp_s_dump_dhw[t]);
+                outs.x_hp_s_op_dhw[t] = cpl.GetValue(x_hp_s_op_dhw[t]);
+                outs.x_boi_s_op_dhw[t] = cpl.GetValue(x_boi_s_op_dhw[t]);
+                outs.x_chp_s_op_e[t] = cpl.GetValue(x_chp_s_op_e[t]);
+                outs.x_chp_s_op_dhw[t] = cpl.GetValue(x_chp_s_op_dhw[t]);
+                outs.x_chp_s_dump_dhw[t] = cpl.GetValue(x_chp_s_dump_dhw[t]);
 
                 outs.b_pvprod[t] = 0;
-                outs.b_pvprod_S_a[t] = 0;
-                outs.b_pvprod_S_b[t] = 0;
-                outs.b_pvprod_W_a[t] = 0;
-                outs.b_pvprod_W_b[t] = 0;
-                outs.b_pvprod_E[t] = 0;
-                outs.b_pvprod_Roof[t] = 0;
                 for (int i = 0; i < this.b_solar_area.Length; i++)
                 {
                     double pvprodnow = this.a_solar[i][t] * 0.001 * this.c_pv_eff[i][t] * cpl.GetValue(x_pv[i]);
                     outs.b_pvprod[t] += pvprodnow;
-                    if (i >= 0 && i <= 17)
-                        outs.b_pvprod_S_a[t] += pvprodnow;
-                    else if (i >= 18 && i <= 22)
-                        outs.b_pvprod_S_b[t] += pvprodnow;
-                    else if (i >= 23 && i <= 32)
-                        outs.b_pvprod_W_a[t] += pvprodnow;
-                    else if (i >= 33 && i <= 38)
-                        outs.b_pvprod_W_b[t] += pvprodnow;
-                    else if (i >= 39 && i <= 53)
-                        outs.b_pvprod_E[t] += pvprodnow;
-                    else if (i >= 54 && i <= 59)
-                        outs.b_pvprod_Roof[t] += pvprodnow;
                 }
             }
             for (int i = 0; i < this.b_solar_area.Length; i++)
                 outs.x_pv[i] = cpl.GetValue(x_pv[i]);
 
-            outs.x_hp = cpl.GetValue(x_hp_s);
-            outs.x_boi = cpl.GetValue(x_boi_s);
-            outs.x_chp = cpl.GetValue(x_chp_s);
+            outs.x_hp_s = cpl.GetValue(x_hp_s);
+            outs.x_boi_s = cpl.GetValue(x_boi_s);
+            outs.x_chp_s = cpl.GetValue(x_chp_s);
             outs.x_ac = x_AC;
             outs.x_tes = cpl.GetValue(x_tes);
             outs.x_bat = cpl.GetValue(x_bat);
@@ -1108,7 +1134,811 @@ namespace UrbanFormEHub
             return outs;
         }
 
+        /// <summary>
+        /// ehub with domestic hot water and space heating separate.
+        /// </summary>
+        /// <param name="bln_mincarbon"></param>
+        /// <param name="carbonconstraint"></param>
+        /// <returns></returns>
+        private Ehub_outputs ehubmodel_dhw(bool bln_mincarbon, double? carbonconstraint = null)
+        {
 
+            //_________________________________________________________________________
+            ///////////////////////////////////////////////////////////////////////////
+            // Initialize solver and other
+            Cplex cpl = new Cplex();
+            Ehub_outputs outs = new Ehub_outputs();
+
+
+
+            int solarspots = this.b_solar_area.Length;   // number of different PV patches
+
+
+
+            double b_co2_target = double.MaxValue;
+            bool bln_co2target = false;
+
+
+            if (!carbonconstraint.IsNullOrDefault())
+            {
+                b_co2_target = Convert.ToDouble(carbonconstraint);
+                bln_co2target = true;
+            }
+
+
+            //_________________________________________________________________________
+            ///////////////////////////////////////////////////////////////////////////
+
+
+
+
+
+
+            //_________________________________________________________________________
+            ///////////////////////////////////////////////////////////////////////////
+            // VARIABLES
+            //int techs = 11;      // 0=HP_s, 1=HP_m, 2=HP_l, 3=Boi_s, 4=Boi_m, 5=Boi_l, 6=CHP_s, 7=CHP_m, 8=CHP_l. 9=PV, 10=ST, TES and Bat are separate
+            //int demands = 3;    // 0 = elec, 1 = sh, 2 = dhw 
+
+
+
+            //AC - not variable, since only one cooling tech
+            double x_AC = this.b_peakcool;                                  // sizing in kW. not a variable
+            double[] x_ac_op = new double[this.horizon];                  // operation in kWh. not variable.
+            double y_ac = (x_AC > 0) ? 1 : 0;
+
+            // PV
+            INumVar[] x_pv = new INumVar[solarspots];                          // m2 installed per patch (pvspots)
+            for (int i = 0; i < solarspots; i++)
+                x_pv[i] = cpl.NumVar(0, this.b_solar_area[i]);              // max available patch area in m2
+            INumVar[] y1 = new INumVar[this.horizon];                       // binary control variable. to avoid selling and purchasing from and to the grid at the same time. from portia. 1 = electricity is being purchased
+            INumVar[] x_purchase = new INumVar[this.horizon];               // purchase electricity from grid
+            INumVar[] x_feedin = new INumVar[this.horizon];                 // feeding in PV electricity into the grid
+            INumVar y_pv = cpl.BoolVar();
+
+            // ST
+            INumVar[] x_st = new INumVar[solarspots];
+            // variables for operating solar collector? or just like pv, no explicit operation variable
+            INumVar[][] x_st_op_sh = new INumVar[solarspots][];
+            INumVar[][] x_st_op_dhw = new INumVar[solarspots][];
+            for (int i = 0; i < solarspots; i++)
+            {
+                x_st[i] = cpl.NumVar(0, this.b_solar_area[i]);
+                x_st_op_sh[i] = new INumVar[this.horizon];
+                x_st_op_dhw[i] = new INumVar[this.horizon];
+            }
+            INumVar y_st = cpl.BoolVar();
+
+            // HP
+            INumVar x_hp_s = cpl.NumVar(0, 50);                           // capacity, in kW
+            INumVar[] x_hp_s_op_sh = new INumVar[this.horizon];             // operation, in kWh, space heating
+            INumVar[] x_hp_s_op_dhw = new INumVar[this.horizon];            // operation, in kWh, domestic hot water
+            INumVar x_hp_m = cpl.NumVar(0, 200);                           // capacity, in kW
+            INumVar[] x_hp_m_op_sh = new INumVar[this.horizon];                // operation, in kWh
+            INumVar[] x_hp_m_op_dhw = new INumVar[this.horizon];                // operation, in kWh
+            INumVar x_hp_l = cpl.NumVar(0, System.Double.MaxValue);       // capacity, in kW
+            INumVar[] x_hp_l_op_sh = new INumVar[this.horizon];                // operation, in kWh
+            INumVar[] x_hp_l_op_dhw = new INumVar[this.horizon];                // operation, in kWh
+            INumVar y_hp_s = cpl.BoolVar();
+            INumVar y_hp_m = cpl.BoolVar();
+            INumVar y_hp_l = cpl.BoolVar();
+
+            // Boiler
+            INumVar x_boi_s = cpl.NumVar(0, 50);                          // capacity, in kW
+            INumVar[] x_boi_s_op_sh = new INumVar[this.horizon];               // operation, in kWh
+            INumVar[] x_boi_s_op_dhw = new INumVar[this.horizon];               // operation, in kWh
+            INumVar x_boi_m = cpl.NumVar(0, 200);                          // capacity, in kW
+            INumVar[] x_boi_m_op_sh = new INumVar[this.horizon];               // operation, in kWh
+            INumVar[] x_boi_m_op_dhw = new INumVar[this.horizon];               // operation, in kWh
+            INumVar x_boi_l = cpl.NumVar(0, System.Double.MaxValue);      // capacity, in kW
+            INumVar[] x_boi_l_op_sh = new INumVar[this.horizon];               // operation, in kWh
+            INumVar[] x_boi_l_op_dhw = new INumVar[this.horizon];               // operation, in kWh
+            INumVar y_boi_s = cpl.BoolVar();
+            INumVar y_boi_m = cpl.BoolVar();
+            INumVar y_boi_l = cpl.BoolVar();
+
+            // CHP
+            INumVar x_chp_s = cpl.NumVar(0, 50);                          // capacity, in kW
+            //INumVar[] y_chp_op_s = new INumVar[this.horizon];              //binary for min part load
+            INumVar[] x_chp_s_op_e = new INumVar[this.horizon];               // operation electricity, in kWh
+            INumVar[] x_chp_s_op_dhw = new INumVar[this.horizon];               // operation heat, in kWh
+            INumVar[] x_chp_s_dump_dhw = new INumVar[this.horizon];               // dumping heat, in kWh
+            INumVar[] x_chp_s_op_sh = new INumVar[this.horizon];               // operation heat, in kWh
+            INumVar[] x_chp_s_dump_sh = new INumVar[this.horizon];               // dumping heat, in kWh
+            INumVar x_chp_m = cpl.NumVar(0, 200);                          // capacity, in kW
+            //INumVar[] y_chp_op_m = new INumVar[this.horizon];              //binary for min part load
+            INumVar[] x_chp_m_op_e = new INumVar[this.horizon];               // operation electricity, in kWh
+            INumVar[] x_chp_m_op_dhw = new INumVar[this.horizon];               // operation heat, in kWh
+            INumVar[] x_chp_m_dump_dhw = new INumVar[this.horizon];               // dumping heat, in kWh
+            INumVar[] x_chp_m_op_sh = new INumVar[this.horizon];               // operation heat, in kWh
+            INumVar[] x_chp_m_dump_sh = new INumVar[this.horizon];               // dumping heat, in kWh
+            INumVar x_chp_l = cpl.NumVar(0, System.Double.MaxValue);      // capacity, in kW
+            //INumVar[] y_chp_op_l = new INumVar[this.horizon];              //binary for min part load
+            INumVar[] x_chp_l_op_e = new INumVar[this.horizon];               // operation electricity, in kWh
+            INumVar[] x_chp_l_op_dhw = new INumVar[this.horizon];               // operation heat, in kWh
+            INumVar[] x_chp_l_dump_dhw = new INumVar[this.horizon];               // dumping heat, in kWh
+            INumVar[] x_chp_l_op_sh = new INumVar[this.horizon];               // operation heat, in kWh
+            INumVar[] x_chp_l_dump_sh = new INumVar[this.horizon];               // dumping heat, in kWh
+            INumVar y_chp_s = cpl.BoolVar();
+            INumVar y_chp_m = cpl.BoolVar();
+            INumVar y_chp_l = cpl.BoolVar();
+
+            // Thermal storage
+            INumVar x_tes = cpl.NumVar(0, this.maxTEScap);               // 40 cubic meter size. thats like 4m x 5m x 2m. (x m3 * 35)
+            INumVar[] x_tes_soc = new INumVar[this.horizon];              // state-of-charge, in kWh
+            INumVar[] x_tes_ch_sh = new INumVar[this.horizon];               // charging storage, in kW
+            INumVar[] x_tes_dis_sh = new INumVar[this.horizon];              // discharging storage, in kW
+            INumVar[] x_tes_ch_dhw = new INumVar[this.horizon];               // charging storage, in kW
+            INumVar[] x_tes_dis_dhw = new INumVar[this.horizon];              // discharging storage, in kW
+            INumVar y_tes = cpl.BoolVar();
+
+            // Battery
+            INumVar x_bat = cpl.NumVar(0, this.maxBatcap);                  // defined by urban form
+            INumVar[] x_bat_ch = new INumVar[this.horizon];                 // charge battery [kW]
+            INumVar[] x_bat_dis = new INumVar[this.horizon];                // discharge battery [kW]
+            INumVar[] x_bat_soc = new INumVar[this.horizon];                // state-of-charge, stored electricity [kW]
+            INumVar y_bat = cpl.BoolVar();
+
+            for (int t = 0; t < this.horizon; t++)
+            {
+                y1[t] = cpl.BoolVar();
+                x_purchase[t] = cpl.NumVar(0, System.Double.MaxValue);
+                x_feedin[t] = cpl.NumVar(0, System.Double.MaxValue);
+
+                //x_ac_op[t] = cpl.NumVar(0, x_AC);
+
+                for (int i = 0; i < solarspots; i++)
+                {
+                    x_st_op_dhw[i][t] = cpl.NumVar(0, System.Double.MaxValue);
+                    x_st_op_sh[i][t] = cpl.NumVar(0, System.Double.MaxValue);
+                }
+
+                x_chp_s_op_e[t] = cpl.NumVar(0, System.Double.MaxValue);
+                x_chp_m_op_e[t] = cpl.NumVar(0, System.Double.MaxValue);
+                x_chp_l_op_e[t] = cpl.NumVar(0, System.Double.MaxValue);
+
+                x_hp_s_op_sh[t] = cpl.NumVar(0, System.Double.MaxValue);
+                x_boi_s_op_sh[t] = cpl.NumVar(0, System.Double.MaxValue);
+                x_chp_s_op_sh[t] = cpl.NumVar(0, System.Double.MaxValue);
+                x_chp_s_dump_sh[t] = cpl.NumVar(0, System.Double.MaxValue);
+
+                x_hp_m_op_sh[t] = cpl.NumVar(0, System.Double.MaxValue);
+                x_boi_m_op_sh[t] = cpl.NumVar(0, System.Double.MaxValue);
+                x_chp_m_op_sh[t] = cpl.NumVar(0, System.Double.MaxValue);
+                x_chp_m_dump_sh[t] = cpl.NumVar(0, System.Double.MaxValue);
+
+                x_hp_l_op_sh[t] = cpl.NumVar(0, System.Double.MaxValue);
+                x_boi_l_op_sh[t] = cpl.NumVar(0, System.Double.MaxValue);
+                x_chp_l_op_sh[t] = cpl.NumVar(0, System.Double.MaxValue);
+                x_chp_l_dump_sh[t] = cpl.NumVar(0, System.Double.MaxValue);
+
+                x_tes_ch_sh[t] = cpl.NumVar(0, System.Double.MaxValue);
+                x_tes_dis_sh[t] = cpl.NumVar(0, System.Double.MaxValue);
+
+
+                x_hp_s_op_dhw[t] = cpl.NumVar(0, System.Double.MaxValue);
+                x_boi_s_op_dhw[t] = cpl.NumVar(0, System.Double.MaxValue);
+                x_chp_s_op_dhw[t] = cpl.NumVar(0, System.Double.MaxValue);
+                x_chp_s_dump_dhw[t] = cpl.NumVar(0, System.Double.MaxValue);
+
+                x_hp_m_op_dhw[t] = cpl.NumVar(0, System.Double.MaxValue);
+                x_boi_m_op_dhw[t] = cpl.NumVar(0, System.Double.MaxValue);
+                x_chp_m_op_dhw[t] = cpl.NumVar(0, System.Double.MaxValue);
+                x_chp_m_dump_dhw[t] = cpl.NumVar(0, System.Double.MaxValue);
+
+                x_hp_l_op_dhw[t] = cpl.NumVar(0, System.Double.MaxValue);
+                x_boi_l_op_dhw[t] = cpl.NumVar(0, System.Double.MaxValue);
+                x_chp_l_op_dhw[t] = cpl.NumVar(0, System.Double.MaxValue);
+                x_chp_l_dump_dhw[t] = cpl.NumVar(0, System.Double.MaxValue);
+
+                x_tes_ch_dhw[t] = cpl.NumVar(0, System.Double.MaxValue);
+                x_tes_dis_dhw[t] = cpl.NumVar(0, System.Double.MaxValue);
+
+
+                x_bat_ch[t] = cpl.NumVar(0, System.Double.MaxValue);
+                x_bat_dis[t] = cpl.NumVar(0, System.Double.MaxValue);
+
+                x_tes_soc[t] = cpl.NumVar(0, System.Double.MaxValue);
+                x_bat_soc[t] = cpl.NumVar(0, System.Double.MaxValue);
+            }
+            //_________________________________________________________________________
+            ///////////////////////////////////////////////////////////////////////////
+
+
+
+
+
+            //_________________________________________________________________________
+            ///////////////////////////////////////////////////////////////////////////
+            // CONSTRAINTS
+
+            //constraint, saying x_st[spot] + x_pv[spot] <= area[spot]
+            for (int i = 0; i < solarspots; i++)
+            {
+                cpl.AddGe(b_solar_area[i], cpl.Sum(x_st[i], x_pv[i]));
+            }
+
+
+
+            // meetings demands
+            for (int t = 0; t < this.horizon; t++)
+            {
+                //cooling is not a variable, since only one tech
+                x_ac_op[t] = this.b_cool[t];    //op cost and co2 is taken care of via electricity
+
+
+                // electricity demand must be met by pv, grid, battery, and chp
+                //      minus electricty sold to the grid, charging the battery, and for operating the heat pump
+                ILinearNumExpr pvproduction = cpl.LinearNumExpr();
+                ILinearNumExpr elecgeneration = cpl.LinearNumExpr();
+                ILinearNumExpr elecadditionaldemand = cpl.LinearNumExpr();
+                for (int i = 0; i < solarspots; i++)
+                {
+                    elecgeneration.AddTerm(this.a_solar[i][t] * 0.001 * this.c_pv_eff[i][t], x_pv[i]);
+                    pvproduction.AddTerm(this.a_solar[i][t] * 0.001 * this.c_pv_eff[i][t], x_pv[i]);     // in kW
+                }
+                elecgeneration.AddTerm(1, x_purchase[t]);
+                elecgeneration.AddTerm(1, x_bat_dis[t]);
+                elecgeneration.AddTerm(c_chp_s_htp, x_chp_s_op_e[t]);
+                elecgeneration.AddTerm(c_chp_m_htp, x_chp_m_op_e[t]);
+                elecgeneration.AddTerm(c_chp_l_htp, x_chp_l_op_e[t]);
+                elecadditionaldemand.AddTerm(1, x_feedin[t]);
+                elecadditionaldemand.AddTerm(1, x_bat_ch[t]);
+                elecadditionaldemand.AddTerm(1 / c_hp_eff_sh[t], x_hp_s_op_sh[t]);
+                elecadditionaldemand.AddTerm(1 / c_hp_eff_sh[t], x_hp_m_op_sh[t]);
+                elecadditionaldemand.AddTerm(1 / c_hp_eff_sh[t], x_hp_l_op_sh[t]);
+                elecadditionaldemand.AddTerm(1 / c_hp_eff_dhw[t], x_hp_s_op_dhw[t]);
+                elecadditionaldemand.AddTerm(1 / c_hp_eff_dhw[t], x_hp_m_op_dhw[t]);
+                elecadditionaldemand.AddTerm(1 / c_hp_eff_dhw[t], x_hp_l_op_dhw[t]);
+                cpl.AddEq(cpl.Diff(elecgeneration, cpl.Sum(c_ac_eff[t] * this.b_cool[t], elecadditionaldemand)), this.b_elec[t]);
+
+
+                // space heating must be met by boiler, hp, chp, st, and TES
+                //      minus heat for TES 
+                ILinearNumExpr shgeneration = cpl.LinearNumExpr();
+                ILinearNumExpr shadditionaldemand = cpl.LinearNumExpr();
+                shadditionaldemand.AddTerm(1, x_tes_ch_sh[t]);
+                shadditionaldemand.AddTerm(1, x_chp_s_dump_sh[t]);
+                shadditionaldemand.AddTerm(1, x_chp_m_dump_sh[t]);
+                shadditionaldemand.AddTerm(1, x_chp_l_dump_sh[t]);
+                shgeneration.AddTerm(1, x_tes_dis_sh[t]);
+                shgeneration.AddTerm(1, x_boi_s_op_sh[t]);
+                shgeneration.AddTerm(1, x_hp_s_op_sh[t]);
+                shgeneration.AddTerm(1, x_chp_s_op_sh[t]);
+                shgeneration.AddTerm(1, x_boi_m_op_sh[t]);
+                shgeneration.AddTerm(1, x_hp_m_op_sh[t]);
+                shgeneration.AddTerm(1, x_chp_m_op_sh[t]);
+                shgeneration.AddTerm(1, x_boi_l_op_sh[t]);
+                shgeneration.AddTerm(1, x_hp_l_op_sh[t]);
+                shgeneration.AddTerm(1, x_chp_l_op_sh[t]);
+                for (int i = 0; i < solarspots; i++)
+                {
+                    shgeneration.AddTerm(1, x_st_op_sh[i][t]);
+                }
+                cpl.AddEq(cpl.Diff(shgeneration, shadditionaldemand), this.b_sh[t]);
+
+
+                // domestic hot water must be met by boiler, hp, chp, st, and TES
+                //      minus heat for TES 
+                ILinearNumExpr dhwgeneration = cpl.LinearNumExpr();
+                ILinearNumExpr dhwadditionaldemand = cpl.LinearNumExpr();
+                dhwadditionaldemand.AddTerm(1, x_tes_ch_dhw[t]);
+                dhwadditionaldemand.AddTerm(1, x_chp_s_dump_dhw[t]);
+                dhwadditionaldemand.AddTerm(1, x_chp_m_dump_dhw[t]);
+                dhwadditionaldemand.AddTerm(1, x_chp_l_dump_dhw[t]);
+                dhwgeneration.AddTerm(1, x_tes_dis_dhw[t]);
+                dhwgeneration.AddTerm(1, x_boi_s_op_dhw[t]);
+                dhwgeneration.AddTerm(1, x_hp_s_op_dhw[t]);
+                dhwgeneration.AddTerm(1, x_chp_s_op_dhw[t]);
+                dhwgeneration.AddTerm(1, x_boi_m_op_dhw[t]);
+                dhwgeneration.AddTerm(1, x_hp_m_op_dhw[t]);
+                dhwgeneration.AddTerm(1, x_chp_m_op_dhw[t]);
+                dhwgeneration.AddTerm(1, x_boi_l_op_dhw[t]);
+                dhwgeneration.AddTerm(1, x_hp_l_op_dhw[t]);
+                dhwgeneration.AddTerm(1, x_chp_l_op_dhw[t]);
+                for (int i = 0; i < solarspots; i++)
+                {
+                    dhwgeneration.AddTerm(1, x_st_op_dhw[i][t]);
+                }
+                cpl.AddEq(cpl.Diff(dhwgeneration, dhwadditionaldemand), this.b_dhw[t]);
+
+                //pv production must be greater or equal feedin
+                cpl.AddGe(pvproduction, x_feedin[t]);
+
+                // donnot allow feedin and purchase at the same time. y = 1 means electricity is being purchased
+                cpl.AddLe(x_purchase[t], cpl.Prod(M, y1[t]));
+                cpl.AddLe(x_feedin[t], cpl.Prod(M, cpl.Diff(1, y1[t])));
+
+            }
+
+
+
+            for (int t = 0; t < this.horizon; t++)
+            {
+                // ST
+                for (int i = 0; i < solarspots; i++)
+                {
+                    ILinearNumExpr stutil = cpl.LinearNumExpr();
+                    stutil.AddTerm(Math.Min(System.Double.MaxValue, Math.Pow(this.c_st_eff_dhw[i][t], -1)), x_st_op_dhw[i][t]);
+                    stutil.AddTerm(Math.Min(System.Double.MaxValue, Math.Pow(this.c_st_eff_sh[i][t], -1)), x_st_op_sh[i][t]);
+                    cpl.AddGe(cpl.Prod(this.a_solar[i][t] * 0.001, x_st[i]), stutil);
+                }
+
+
+
+                // CHP 
+                cpl.AddLe(x_chp_s_op_e[t], x_chp_s);
+                cpl.AddLe(x_chp_m_op_e[t], x_chp_m);
+                cpl.AddLe(x_chp_l_op_e[t], x_chp_l);
+                // heat recovery (SH + DHW) and heat dump from CHP is equal to electricity generation by CHP times heat to power ratio
+                ILinearNumExpr chpheatrecov_s = cpl.LinearNumExpr();
+                ILinearNumExpr chpheatfromelec_s = cpl.LinearNumExpr();
+                chpheatrecov_s.AddTerm(1, x_chp_s_op_dhw[t]);
+                chpheatrecov_s.AddTerm(1, x_chp_s_dump_dhw[t]);
+                chpheatrecov_s.AddTerm(1, x_chp_s_op_sh[t]);
+                chpheatrecov_s.AddTerm(1, x_chp_s_dump_sh[t]);
+                chpheatfromelec_s.AddTerm(c_chp_s_htp, x_chp_s_op_e[t]);
+                cpl.AddEq(chpheatrecov_s, chpheatfromelec_s);
+                ILinearNumExpr chpheatrecov_m = cpl.LinearNumExpr();
+                ILinearNumExpr chpheatfromelec_m = cpl.LinearNumExpr();
+                chpheatrecov_m.AddTerm(1, x_chp_m_op_dhw[t]);
+                chpheatrecov_m.AddTerm(1, x_chp_m_dump_dhw[t]);
+                chpheatrecov_m.AddTerm(1, x_chp_m_op_sh[t]);
+                chpheatrecov_m.AddTerm(1, x_chp_m_dump_sh[t]);
+                chpheatfromelec_m.AddTerm(c_chp_m_htp, x_chp_m_op_e[t]);
+                cpl.AddEq(chpheatrecov_m, chpheatfromelec_m);
+                ILinearNumExpr chpheatrecov_l = cpl.LinearNumExpr();
+                ILinearNumExpr chpheatfromelec_l = cpl.LinearNumExpr();
+                chpheatrecov_l.AddTerm(1, x_chp_l_op_dhw[t]);
+                chpheatrecov_l.AddTerm(1, x_chp_l_dump_dhw[t]);
+                chpheatrecov_l.AddTerm(1, x_chp_l_op_sh[t]);
+                chpheatrecov_l.AddTerm(1, x_chp_l_dump_sh[t]);
+                chpheatfromelec_l.AddTerm(c_chp_l_htp, x_chp_l_op_e[t]);
+                cpl.AddEq(chpheatrecov_l, chpheatfromelec_l);
+                // Limiting the amount of heat that chps can dump
+                cpl.AddLe(x_chp_s_dump_dhw[t], cpl.Prod(c_chp_heatdump, x_chp_s_op_dhw[t]));
+                cpl.AddLe(x_chp_m_dump_dhw[t], cpl.Prod(c_chp_heatdump, x_chp_m_op_dhw[t]));
+                cpl.AddLe(x_chp_l_dump_dhw[t], cpl.Prod(c_chp_heatdump, x_chp_l_op_dhw[t]));
+                cpl.AddLe(x_chp_s_dump_sh[t], cpl.Prod(c_chp_heatdump, x_chp_s_op_sh[t]));
+                cpl.AddLe(x_chp_m_dump_sh[t], cpl.Prod(c_chp_heatdump, x_chp_m_op_sh[t]));
+                cpl.AddLe(x_chp_l_dump_sh[t], cpl.Prod(c_chp_heatdump, x_chp_l_op_sh[t]));
+
+                // Boiler 
+                cpl.AddLe(cpl.Sum(x_boi_s_op_dhw[t], x_boi_s_op_sh[t]), x_boi_s);
+                cpl.AddLe(cpl.Sum(x_boi_m_op_dhw[t], x_boi_m_op_sh[t]), x_boi_m);
+                cpl.AddLe(cpl.Sum(x_boi_l_op_dhw[t], x_boi_l_op_sh[t]), x_boi_l);
+
+                // HP 
+                cpl.AddLe(cpl.Sum(x_hp_s_op_dhw[t], x_hp_s_op_sh[t]), x_hp_s);
+                cpl.AddLe(cpl.Sum(x_hp_m_op_dhw[t], x_hp_m_op_sh[t]), x_hp_m);
+                cpl.AddLe(cpl.Sum(x_hp_l_op_dhw[t], x_hp_l_op_sh[t]), x_hp_l);
+            }
+
+            // TES
+            for (int t = 0; t < this.horizon - 1; t++)
+            {
+                ILinearNumExpr tesstate = cpl.LinearNumExpr();
+                tesstate.AddTerm((1 - tes_decay), x_tes_soc[t]);
+                tesstate.AddTerm(tes_ch_eff, x_tes_ch_sh[t]);
+                tesstate.AddTerm(tes_ch_eff, x_tes_ch_dhw[t]);
+                tesstate.AddTerm(-1 / tes_disch_eff, x_tes_dis_dhw[t]);
+                tesstate.AddTerm(-1 / tes_disch_eff, x_tes_dis_sh[t]);
+                cpl.AddEq(x_tes_soc[t + 1], tesstate);
+            }
+            cpl.AddEq(x_tes_soc[0], x_tes_soc[this.horizon - 1]);
+            cpl.AddEq(x_tes_dis_dhw[0], 0);
+            cpl.AddEq(x_tes_dis_sh[0], 0);
+            for (int t = 0; t < this.horizon; t++)
+            {
+                cpl.AddLe(cpl.Sum(x_tes_ch_dhw[t], x_tes_ch_sh[t]), cpl.Prod(x_tes, tes_max_ch));
+                cpl.AddLe(cpl.Sum(x_tes_dis_dhw[t], x_tes_dis_sh[t]), cpl.Prod(x_tes, tes_max_disch));
+                cpl.AddLe(x_tes_soc[t], x_tes);
+            }
+
+
+            // Battery model
+            for (int t = 0; t < this.horizon - 1; t++)
+            {
+                ILinearNumExpr batstate = cpl.LinearNumExpr();          // losses when charging, discharging, and decay
+                batstate.AddTerm((1 - bat_decay), x_bat_soc[t]);
+                batstate.AddTerm(bat_ch_eff, x_bat_ch[t]);
+                batstate.AddTerm(-1 / bat_disch_eff, x_bat_dis[t]);
+                cpl.AddEq(x_bat_soc[t + 1], batstate);
+            }
+            cpl.AddGe(x_bat_soc[0], cpl.Prod(x_bat, bat_min_state));    // initial state of battery >= min_state
+            cpl.AddEq(x_bat_soc[0], cpl.Diff(x_bat_soc[this.horizon - 1], x_bat_dis[this.horizon - 1])); //initial state also = state(end of year)
+            cpl.AddEq(x_bat_dis[0], 0);                                  // initial discharging of battery
+
+            for (int t = 0; t < this.horizon; t++)
+            {
+                cpl.AddGe(x_bat_soc[t], cpl.Prod(x_bat, bat_min_state));    // min state of charge
+                cpl.AddLe(x_bat_ch[t], cpl.Prod(x_bat, bat_max_ch));         // battery charging
+                cpl.AddLe(x_bat_dis[t], cpl.Prod(x_bat, bat_max_disch));     // battery discharging
+                cpl.AddLe(x_bat_soc[t], x_bat);                             // battery sizing
+            }
+
+
+
+            //min sizing indicator
+            cpl.AddGe(x_boi_s, cpl.Prod(5, y_boi_s));
+            cpl.AddGe(x_boi_m, cpl.Prod(50, y_boi_m));
+            cpl.AddGe(x_boi_l, cpl.Prod(200, y_boi_l));
+            cpl.AddGe(x_hp_s, cpl.Prod(5, y_hp_s));
+            cpl.AddGe(x_hp_m, cpl.Prod(50, y_hp_m));
+            cpl.AddGe(x_hp_l, cpl.Prod(200, y_hp_l));
+            cpl.AddGe(x_chp_s, cpl.Prod(5, y_chp_s));
+            cpl.AddGe(x_chp_m, cpl.Prod(50, x_chp_m));
+            cpl.AddGe(x_chp_l, cpl.Prod(200, y_chp_l));
+            cpl.AddGe(x_tes, cpl.Prod(20, y_tes));
+            cpl.AddGe(x_bat, cpl.Prod(1, y_bat));
+
+
+
+            //fix cost indicator
+
+            // ST and PV
+            ILinearNumExpr st_totcap = cpl.LinearNumExpr();
+            ILinearNumExpr pv_totcap = cpl.LinearNumExpr();
+            for (int i = 0; i < solarspots; i++)
+            {
+                st_totcap.AddTerm(1, x_st[i]);
+                pv_totcap.AddTerm(1, x_pv[i]);
+            }
+            cpl.AddLe(st_totcap, cpl.Prod(M, y_st)); //fixcost indicator
+            cpl.AddLe(pv_totcap, cpl.Prod(M, y_pv));
+
+            //CHP
+            cpl.AddLe(x_chp_s, cpl.Prod(M, y_chp_s));
+            cpl.AddLe(x_chp_m, cpl.Prod(M, y_chp_m));
+            cpl.AddLe(x_chp_l, cpl.Prod(M, y_chp_l));
+
+            //Boi
+            cpl.AddLe(x_boi_s, cpl.Prod(M, y_boi_s));
+            cpl.AddLe(x_boi_m, cpl.Prod(M, y_boi_m));
+            cpl.AddLe(x_boi_l, cpl.Prod(M, y_boi_l));
+
+            //HP
+            cpl.AddLe(x_hp_s, cpl.Prod(M, y_hp_s));
+            cpl.AddLe(x_hp_m, cpl.Prod(M, y_hp_m));
+            cpl.AddLe(x_hp_l, cpl.Prod(M, y_hp_l));
+
+            //TES
+            cpl.AddLe(x_tes, cpl.Prod(M, y_tes));
+
+            //BAt
+            cpl.AddLe(x_bat, cpl.Prod(M, y_bat));
+
+            //_________________________________________________________________________
+            ///////////////////////////////////////////////////////////////////////////
+            // co2 constraint
+            ILinearNumExpr a_co2 = cpl.LinearNumExpr();
+            for (int t = 0; t < this.horizon; t++)
+            {
+                // co2 emissions by purchase from grid and heat pump
+                a_co2.AddTerm((this.a_carbon[t] / 1000) * this.c_num_of_days[t], x_purchase[t]);
+                a_co2.AddTerm((this.a_carbon[t] / 1000) * this.c_num_of_days[t] * (1 / c_hp_eff_dhw[t]), x_hp_s_op_dhw[t]);
+                a_co2.AddTerm((this.a_carbon[t] / 1000) * this.c_num_of_days[t] * (1 / c_hp_eff_dhw[t]), x_hp_m_op_dhw[t]);
+                a_co2.AddTerm((this.a_carbon[t] / 1000) * this.c_num_of_days[t] * (1 / c_hp_eff_dhw[t]), x_hp_l_op_dhw[t]);
+                a_co2.AddTerm((this.a_carbon[t] / 1000) * this.c_num_of_days[t] * (1 / c_hp_eff_sh[t]), x_hp_s_op_sh[t]);
+                a_co2.AddTerm((this.a_carbon[t] / 1000) * this.c_num_of_days[t] * (1 / c_hp_eff_sh[t]), x_hp_m_op_sh[t]);
+                a_co2.AddTerm((this.a_carbon[t] / 1000) * this.c_num_of_days[t] * (1 / c_hp_eff_sh[t]), x_hp_l_op_sh[t]);
+                // co2 by natural gas
+                a_co2.AddTerm(lca_gas * this.c_num_of_days[t] * (1 / c_boi_eff), x_boi_s_op_dhw[t]);
+                a_co2.AddTerm(lca_gas * this.c_num_of_days[t] * (1 / c_boi_eff), x_boi_m_op_dhw[t]);
+                a_co2.AddTerm(lca_gas * this.c_num_of_days[t] * (1 / c_boi_eff), x_boi_l_op_dhw[t]);
+                a_co2.AddTerm(lca_gas * this.c_num_of_days[t] * (1 / c_boi_eff), x_boi_s_op_sh[t]);
+                a_co2.AddTerm(lca_gas * this.c_num_of_days[t] * (1 / c_boi_eff), x_boi_m_op_sh[t]);
+                a_co2.AddTerm(lca_gas * this.c_num_of_days[t] * (1 / c_boi_eff), x_boi_l_op_sh[t]);
+                a_co2.AddTerm(lca_gas * this.c_num_of_days[t] * (1 / c_chp_s_eff), x_chp_s_op_e[t]);
+                a_co2.AddTerm(lca_gas * this.c_num_of_days[t] * (1 / c_chp_m_eff), x_chp_m_op_e[t]);
+                a_co2.AddTerm(lca_gas * this.c_num_of_days[t] * (1 / c_chp_l_eff), x_chp_l_op_e[t]);
+            }
+
+
+            for (int i = 0; i < solarspots; i++)
+                a_co2.AddTerm(lca_pv, x_pv[i]);
+
+            a_co2.AddTerm(lca_boiler, x_boi_s);
+            a_co2.AddTerm(lca_hp, x_hp_s);
+            a_co2.AddTerm(lca_chp, x_chp_s);
+            a_co2.AddTerm(lca_therm, x_tes);
+            a_co2.AddTerm(lca_battery, x_bat);
+
+
+            if (bln_co2target && !bln_mincarbon) cpl.AddLe(cpl.Sum(lca_ac * x_AC, a_co2), b_co2_target);
+            //_________________________________________________________________________
+            ///////////////////////////////////////////////////////////////////////////
+
+
+
+
+
+
+            //_________________________________________________________________________
+            ///////////////////////////////////////////////////////////////////////////
+            // PROBLEM OBJECTIVE FUNCTION
+            ILinearNumExpr OPEX = cpl.LinearNumExpr();
+            ILinearNumExpr CAPEX = cpl.LinearNumExpr();
+            for (int i = 0; i < solarspots; i++)
+            {
+                CAPEX.AddTerm(c_pv, x_pv[i]);
+                CAPEX.AddTerm(c_st, x_st[i]);
+            }
+            CAPEX.AddTerm(c_hp_s, x_hp_s);
+            CAPEX.AddTerm(c_hp_m, x_hp_m);
+            CAPEX.AddTerm(c_hp_l, x_hp_l);
+            CAPEX.AddTerm(c_boi_s, x_boi_s);
+            CAPEX.AddTerm(c_boi_m, x_boi_m);
+            CAPEX.AddTerm(c_boi_l, x_boi_l);
+            CAPEX.AddTerm(c_chp_s, x_chp_s);
+            CAPEX.AddTerm(c_chp_m, x_chp_m);
+            CAPEX.AddTerm(c_chp_l, x_chp_l);
+            CAPEX.AddTerm(c_tes, x_tes);
+            CAPEX.AddTerm(c_bat, x_bat);
+
+            CAPEX.AddTerm(fc_pv, y_pv);
+            CAPEX.AddTerm(fc_st, y_st);
+            CAPEX.AddTerm(fc_boi_s, y_boi_s);
+            CAPEX.AddTerm(fc_boi_m, y_boi_m);
+            CAPEX.AddTerm(fc_boi_l, y_boi_l);
+            CAPEX.AddTerm(fc_hp_s, y_hp_s);
+            CAPEX.AddTerm(fc_hp_m, y_hp_m);
+            CAPEX.AddTerm(fc_hp_l, y_hp_l);
+            CAPEX.AddTerm(fc_chp_s, y_chp_s);
+            CAPEX.AddTerm(fc_chp_m, y_chp_m);
+            CAPEX.AddTerm(fc_chp_l, y_chp_l);
+            CAPEX.AddTerm(fc_bat, y_bat);
+            CAPEX.AddTerm(fc_tes, y_tes);
+
+
+            for (int t = 0; t < this.horizon; t++)
+            {
+                OPEX.AddTerm(this.c_grid[t] * this.c_num_of_days[t], x_purchase[t]);
+                OPEX.AddTerm(-1.0 * this.c_feedin[t] * this.c_num_of_days[t], x_feedin[t]);
+
+                for (int i = 0; i < solarspots; i++)
+                {
+                    OPEX.AddTerm((c_pv_om * this.a_solar[i][t] * 0.001 * this.c_pv_eff[i][t] * this.c_num_of_days[t]), x_pv[i]);
+                    OPEX.AddTerm((c_st_om * this.c_num_of_days[t]), x_st_op_dhw[i][t]);
+                    OPEX.AddTerm((c_st_om * this.c_num_of_days[t]), x_st_op_sh[i][t]);
+                }
+
+                OPEX.AddTerm((c_gas / c_chp_s_eff) * this.c_num_of_days[t], x_chp_s_op_e[t]);
+                OPEX.AddTerm((c_gas / c_chp_m_eff) * this.c_num_of_days[t], x_chp_m_op_e[t]);
+                OPEX.AddTerm((c_gas / c_chp_l_eff) * this.c_num_of_days[t], x_chp_l_op_e[t]);
+                OPEX.AddTerm(c_chp_om * this.c_num_of_days[t], x_chp_s_op_e[t]);
+                OPEX.AddTerm(c_chp_om * this.c_num_of_days[t], x_chp_m_op_e[t]);
+                OPEX.AddTerm(c_chp_om * this.c_num_of_days[t], x_chp_l_op_e[t]);
+
+                OPEX.AddTerm((c_gas / c_boi_eff) * this.c_num_of_days[t], x_boi_s_op_dhw[t]);
+                OPEX.AddTerm((c_gas / c_boi_eff) * this.c_num_of_days[t], x_boi_m_op_dhw[t]);
+                OPEX.AddTerm((c_gas / c_boi_eff) * this.c_num_of_days[t], x_boi_l_op_dhw[t]);
+                OPEX.AddTerm((c_gas / c_boi_eff) * this.c_num_of_days[t], x_boi_s_op_sh[t]);
+                OPEX.AddTerm((c_gas / c_boi_eff) * this.c_num_of_days[t], x_boi_m_op_sh[t]);
+                OPEX.AddTerm((c_gas / c_boi_eff) * this.c_num_of_days[t], x_boi_l_op_sh[t]);
+
+                OPEX.AddTerm(c_hp_om * this.c_num_of_days[t], x_hp_s_op_dhw[t]);
+                OPEX.AddTerm(c_hp_om * this.c_num_of_days[t], x_hp_m_op_dhw[t]);
+                OPEX.AddTerm(c_hp_om * this.c_num_of_days[t], x_hp_l_op_dhw[t]);
+                OPEX.AddTerm(c_boi_om * this.c_num_of_days[t], x_boi_s_op_dhw[t]);
+                OPEX.AddTerm(c_boi_om * this.c_num_of_days[t], x_boi_m_op_dhw[t]);
+                OPEX.AddTerm(c_boi_om * this.c_num_of_days[t], x_boi_l_op_dhw[t]);
+                OPEX.AddTerm(c_tes_om * this.c_num_of_days[t], x_tes_ch_dhw[t]);
+                OPEX.AddTerm(c_tes_om * this.c_num_of_days[t], x_tes_dis_dhw[t]);
+
+                OPEX.AddTerm(c_hp_om * this.c_num_of_days[t], x_hp_s_op_sh[t]);
+                OPEX.AddTerm(c_hp_om * this.c_num_of_days[t], x_hp_m_op_sh[t]);
+                OPEX.AddTerm(c_hp_om * this.c_num_of_days[t], x_hp_l_op_sh[t]);
+                OPEX.AddTerm(c_boi_om * this.c_num_of_days[t], x_boi_s_op_sh[t]);
+                OPEX.AddTerm(c_boi_om * this.c_num_of_days[t], x_boi_m_op_sh[t]);
+                OPEX.AddTerm(c_boi_om * this.c_num_of_days[t], x_boi_l_op_sh[t]);
+                OPEX.AddTerm(c_tes_om * this.c_num_of_days[t], x_tes_ch_sh[t]);
+                OPEX.AddTerm(c_tes_om * this.c_num_of_days[t], x_tes_dis_sh[t]);
+
+                OPEX.AddTerm(c_bat_om * this.c_num_of_days[t], x_bat_ch[t]);
+                OPEX.AddTerm(c_bat_om * this.c_num_of_days[t], x_bat_dis[t]);
+            }
+            // cost minimization
+            if (!bln_mincarbon) cpl.AddMinimize(cpl.Sum(OPEX, cpl.Sum(CAPEX, c_ac * x_AC + y_ac * fc_ac)));
+            // co2 minimization
+            if (bln_mincarbon) cpl.AddMinimize(a_co2);
+            //_________________________________________________________________________
+            ///////////////////////////////////////////////////////////////////////////
+
+
+
+
+
+
+            //_________________________________________________________________________
+            ///////////////////////////////////////////////////////////////////////////
+            // SOLVE and CPLEX SETTINGS
+            cpl.SetParam(Cplex.Param.ClockType, 2);     // 2 = measuring time in wall clock time. 1 = cpu time
+            cpl.SetParam(Cplex.Param.TimeLimit, 60);
+            //cpl.SetParam(Cplex.Param.MIP.Tolerances.MIPGap, 0.05);
+            //cpl.SetOut(null);
+            cpl.Solve();
+
+            //Console.WriteLine("mip gap: {0}", cpl.GetMIPRelativeGap());
+            //_________________________________________________________________________
+            ///////////////////////////////////////////////////////////////////////////
+
+
+
+
+
+            //_________________________________________________________________________
+            ///////////////////////////////////////////////////////////////////////////
+            // OUTPUTS
+            //for (int i = 0; i < pvspots; i++)
+            //    Console.WriteLine("pv spot {0}, area installed: {1}", i, cpl.GetValue(x_pv[i]));
+
+
+            //if (bln_mincarbon)
+            //{
+            //    Console.WriteLine("cost: " + cpl.GetValue(cpl.Sum(OPEX, CAPEX)));
+            //}
+            //else
+            //    Console.WriteLine("cost: " + cpl.ObjValue);
+
+            //Console.WriteLine("OPEX: {0}... CAPEX: {1}", cpl.GetValue(OPEX), cpl.GetValue(CAPEX));
+
+            //Console.WriteLine("total co2 emissions: {0}", cpl.GetValue(a_co2));
+            //Console.WriteLine("tot pur: {0}, tot sold: {1}", cpl.GetValue(cpl.Sum(x_purchase)), cpl.GetValue(cpl.Sum(x_feedin)));
+            //Console.ReadKey();
+
+            if (bln_mincarbon)
+            {
+                outs.cost = cpl.GetValue(cpl.Sum(OPEX, CAPEX));
+                outs.carbon = cpl.ObjValue;
+            }
+            else
+            {
+                outs.cost = cpl.ObjValue;
+                outs.carbon = cpl.GetValue(a_co2);
+            }
+
+            outs.x_elecpur = new double[this.horizon];
+            outs.x_feedin = new double[this.horizon];
+            outs.b_pvprod = new double[this.horizon];
+
+            outs.x_batcharge = new double[this.horizon];
+            outs.x_batdischarge = new double[this.horizon];
+            outs.x_batsoc = new double[this.horizon];
+            outs.x_tessoc = new double[this.horizon];
+            outs.x_tescharge_dhw = new double[this.horizon];
+            outs.x_tesdischarge_dhw = new double[this.horizon];
+            outs.x_tescharge_sh = new double[this.horizon];
+            outs.x_tesdischarge_sh = new double[this.horizon];
+
+            outs.x_st_optot_dhw = new double[this.horizon];
+            outs.x_st_optot_sh = new double[this.horizon];
+            outs.x_st_op_dhw = new double[solarspots][];
+            outs.x_st_op_sh = new double[solarspots][];
+            for (int i = 0; i < solarspots; i++)
+            {
+                outs.x_st_op_dhw[i] = new double[this.horizon];
+                outs.x_st_op_sh[i] = new double[this.horizon];
+            }
+
+            outs.x_hp_s_op_dhw = new double[this.horizon];
+            outs.x_boi_s_op_dhw = new double[this.horizon];
+            outs.x_chp_s_op_dhw = new double[this.horizon];
+            outs.x_chp_s_dump_dhw = new double[this.horizon];
+            outs.x_hp_m_op_dhw = new double[this.horizon];
+            outs.x_boi_m_op_dhw = new double[this.horizon];
+            outs.x_chp_m_op_dhw = new double[this.horizon];
+            outs.x_chp_m_dump_dhw = new double[this.horizon];
+            outs.x_hp_l_op_dhw = new double[this.horizon];
+            outs.x_boi_l_op_dhw = new double[this.horizon];
+            outs.x_chp_l_op_dhw = new double[this.horizon];
+            outs.x_chp_l_dump_dhw = new double[this.horizon];
+
+            outs.x_hp_s_op_sh = new double[this.horizon];
+            outs.x_boi_s_op_sh = new double[this.horizon];
+            outs.x_chp_s_op_sh = new double[this.horizon];
+            outs.x_chp_s_dump_sh = new double[this.horizon];
+            outs.x_hp_m_op_sh = new double[this.horizon];
+            outs.x_boi_m_op_sh = new double[this.horizon];
+            outs.x_chp_m_op_sh = new double[this.horizon];
+            outs.x_chp_m_dump_sh = new double[this.horizon];
+            outs.x_hp_l_op_sh = new double[this.horizon];
+            outs.x_boi_l_op_sh = new double[this.horizon];
+            outs.x_chp_l_op_sh = new double[this.horizon];
+            outs.x_chp_l_dump_sh = new double[this.horizon];
+
+            outs.x_chp_s_op_e = new double[this.horizon];
+            outs.x_chp_m_op_e = new double[this.horizon];
+            outs.x_chp_l_op_e = new double[this.horizon];
+
+
+            outs.x_pv = new double[this.b_solar_area.Length];
+            outs.x_st = new double[this.b_solar_area.Length];
+            for (int t = 0; t < this.horizon; t++)
+            {
+                outs.x_elecpur[t] = cpl.GetValue(x_purchase[t]);
+                outs.x_feedin[t] = cpl.GetValue(x_feedin[t]);
+                outs.x_batcharge[t] = cpl.GetValue(x_bat_ch[t]);
+                outs.x_batdischarge[t] = cpl.GetValue(x_bat_dis[t]);
+                outs.x_batsoc[t] = cpl.GetValue(x_bat_soc[t]);
+                outs.x_tessoc[t] = cpl.GetValue(x_tes_soc[t]);
+                outs.x_tescharge_dhw[t] = cpl.GetValue(x_tes_ch_dhw[t]);
+                outs.x_tesdischarge_dhw[t] = cpl.GetValue(x_tes_dis_dhw[t]);
+                outs.x_tescharge_sh[t] = cpl.GetValue(x_tes_ch_sh[t]);
+                outs.x_tesdischarge_sh[t] = cpl.GetValue(x_tes_dis_sh[t]);
+                outs.x_hp_s_op_dhw[t] = cpl.GetValue(x_hp_s_op_dhw[t]);
+                outs.x_boi_s_op_dhw[t] = cpl.GetValue(x_boi_s_op_dhw[t]);
+                outs.x_chp_s_op_dhw[t] = cpl.GetValue(x_chp_s_op_dhw[t]);
+                outs.x_chp_s_dump_dhw[t] = cpl.GetValue(x_chp_s_dump_dhw[t]);
+                outs.x_hp_m_op_dhw[t] = cpl.GetValue(x_hp_m_op_dhw[t]);
+                outs.x_boi_m_op_dhw[t] = cpl.GetValue(x_boi_m_op_dhw[t]);
+                outs.x_chp_m_op_dhw[t] = cpl.GetValue(x_chp_m_op_dhw[t]);
+                outs.x_chp_m_dump_dhw[t] = cpl.GetValue(x_chp_m_dump_dhw[t]);
+                outs.x_hp_l_op_dhw[t] = cpl.GetValue(x_hp_l_op_dhw[t]);
+                outs.x_boi_l_op_dhw[t] = cpl.GetValue(x_boi_l_op_dhw[t]);
+                outs.x_chp_l_op_dhw[t] = cpl.GetValue(x_chp_l_op_dhw[t]);
+                outs.x_chp_l_dump_dhw[t] = cpl.GetValue(x_chp_l_dump_dhw[t]);
+                outs.x_hp_s_op_sh[t] = cpl.GetValue(x_hp_s_op_sh[t]);
+                outs.x_boi_s_op_sh[t] = cpl.GetValue(x_boi_s_op_sh[t]);
+                outs.x_chp_s_op_sh[t] = cpl.GetValue(x_chp_s_op_sh[t]);
+                outs.x_chp_s_dump_sh[t] = cpl.GetValue(x_chp_s_dump_sh[t]);
+                outs.x_hp_m_op_sh[t] = cpl.GetValue(x_hp_m_op_sh[t]);
+                outs.x_boi_m_op_sh[t] = cpl.GetValue(x_boi_m_op_sh[t]);
+                outs.x_chp_m_op_sh[t] = cpl.GetValue(x_chp_m_op_sh[t]);
+                outs.x_chp_m_dump_sh[t] = cpl.GetValue(x_chp_m_dump_sh[t]);
+                outs.x_hp_l_op_sh[t] = cpl.GetValue(x_hp_l_op_sh[t]);
+                outs.x_boi_l_op_sh[t] = cpl.GetValue(x_boi_l_op_sh[t]);
+                outs.x_chp_l_op_sh[t] = cpl.GetValue(x_chp_l_op_sh[t]);
+                outs.x_chp_l_dump_sh[t] = cpl.GetValue(x_chp_l_dump_sh[t]);
+                outs.x_chp_s_op_e[t] = cpl.GetValue(x_chp_s_op_e[t]);
+                outs.x_chp_m_op_e[t] = cpl.GetValue(x_chp_m_op_e[t]);
+                outs.x_chp_l_op_e[t] = cpl.GetValue(x_chp_l_op_e[t]);
+
+                outs.b_pvprod[t] = 0;
+                outs.x_st_optot_dhw[t] = 0;
+                outs.x_st_optot_sh[t] = 0;
+                for (int i = 0; i < this.b_solar_area.Length; i++)
+                {
+                    double pvprodnow = this.a_solar[i][t] * 0.001 * this.c_pv_eff[i][t] * cpl.GetValue(x_pv[i]);
+                    outs.b_pvprod[t] += pvprodnow;
+                    outs.x_st_optot_dhw[t] += cpl.GetValue(x_st_op_dhw[i][t]);
+                    outs.x_st_optot_sh[t] += cpl.GetValue(x_st_op_sh[i][t]);
+
+                    outs.x_st_op_dhw[i][t] = cpl.GetValue(x_st_op_dhw[i][t]);
+                    outs.x_st_op_sh[i][t] = cpl.GetValue(x_st_op_sh[i][t]);
+                }
+            }
+            for (int i = 0; i < this.b_solar_area.Length; i++)
+            {
+                outs.x_pv[i] = cpl.GetValue(x_pv[i]);
+                outs.x_st[i] = cpl.GetValue(x_st[i]);
+            }
+
+            outs.x_ac = x_AC;
+            outs.x_tes = cpl.GetValue(x_tes);
+            outs.x_bat = cpl.GetValue(x_bat);
+
+            outs.x_hp_s = cpl.GetValue(x_hp_s);
+            outs.x_boi_s = cpl.GetValue(x_boi_s);
+            outs.x_chp_s = cpl.GetValue(x_chp_s);
+            outs.x_hp_m = cpl.GetValue(x_hp_m);
+            outs.x_boi_m = cpl.GetValue(x_boi_m);
+            outs.x_chp_m = cpl.GetValue(x_chp_m);
+            outs.x_hp_l = cpl.GetValue(x_hp_l);
+            outs.x_boi_l = cpl.GetValue(x_boi_l);
+            outs.x_chp_l = cpl.GetValue(x_chp_l);
+
+
+            outs.OPEX = cpl.GetValue(OPEX);
+            outs.CAPEX = cpl.GetValue(CAPEX);
+            //_________________________________________________________________________
+            ///////////////////////////////////////////////////////////////////////////
+
+
+
+
+            return outs;
+        }
 
 
 
@@ -1351,7 +2181,7 @@ namespace UrbanFormEHub
                 maxBatCap = listA[0];
                 maxTESCap = listA[1];
             }
- 
+
         }
 
         /// <summary>
