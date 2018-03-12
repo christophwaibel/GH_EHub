@@ -62,11 +62,11 @@ namespace UrbanFormEHub
 
             if (!carbcon.IsNullOrDefault())
             {
-                Ehub ehub = new Ehub(path, carbmin, carbcon);
+                Ehub ehub = new Ehub(path, carbmin, false, carbcon);
             }
             else
             {
-                Ehub ehub = new Ehub(path, carbmin);
+                Ehub ehub = new Ehub(path, carbmin, false);
             }
 
         }
