@@ -16,9 +16,10 @@ namespace ConsoleTest
             string path = @"C:\Users\Christoph\Documents\Visual Studio 2012\Projects\GHUrbanMorphologyEHub\UrbanFormEHub\bin\";
             bool carbmin = false;
             bool minpartload = false;
-            double carbcon = 10.06;
-            //Ehub ehub = new Ehub(path, carbmin, minpartload, carbcon);
-            Ehub ehub = new Ehub(path, carbmin, minpartload);
+            double gfa = 2000;  // gross floor area of urban design
+            double carbcon = 10.06;     //this needs to be kgco2/m2a, using the GFA of the urban form design
+            //Ehub ehub = new Ehub(path, gfa, carbmin, minpartload, carbcon);
+            Ehub ehub = new Ehub(path, gfa, carbmin, minpartload);
         }
     }
 }

@@ -358,10 +358,11 @@ namespace ConsoleTest
         /// Create new energyhub object
         /// </summary>
         /// <param name="path">path with inputs</param>
+        /// <param name="gfa">gross floor area of urban design, in sqm</param>
         /// <param name="crbmin">minimize carbon, instead of cost?</param>
         /// <param name="minpartload">activate minimum partload for CHP?</param>
         /// <param name="crbconstr">carbon constraint</param>
-        internal Ehub(string path, bool crbmin, bool minpartload, double? crbconstr = null)
+        internal Ehub(string path, double gfa, bool crbmin, bool minpartload, double? crbconstr = null)
         {
             // ===================================================================
             // Pre-processing. Loading profiles etc.
@@ -389,7 +390,7 @@ namespace ConsoleTest
 
 
             //solve
-            this.outputs = this.ehubmodel(crbmin, minpartload, crbconstr);
+            this.outputs = this.ehubmodel(gfa, crbmin, minpartload, crbconstr);
 
 
         }
@@ -401,7 +402,7 @@ namespace ConsoleTest
         /// <param name="bln_mincarbon"></param>
         /// <param name="carbonconstraint"></param>
         /// <returns></returns>
-        private Ehub_outputs ehubmodel(bool bln_mincarbon, bool minpartload, double? carbonconstraint = null)
+        private Ehub_outputs ehubmodel(double gfa, bool bln_mincarbon, bool minpartload, double? carbonconstraint = null)
         {
 
             //_________________________________________________________________________
@@ -934,7 +935,7 @@ namespace ConsoleTest
             a_co2.AddTerm(lca_battery, x_bat);
 
 
-            if (bln_co2target && !bln_mincarbon) cpl.AddLe(cpl.Sum(lca_ac * x_AC, a_co2), b_co2_target);
+            if (bln_co2target && !bln_mincarbon) cpl.AddLe(cpl.Prod(cpl.Sum(lca_ac * x_AC, a_co2), 1/gfa), b_co2_target);
             //_________________________________________________________________________
             ///////////////////////////////////////////////////////////////////////////
 
@@ -1030,7 +1031,7 @@ namespace ConsoleTest
             // cost minimization
             if (!bln_mincarbon) cpl.AddMinimize(cpl.Sum(OPEX, cpl.Sum(CAPEX, c_ac * x_AC + y_ac * fc_ac)));
             // co2 minimization
-            if (bln_mincarbon) cpl.AddMinimize(a_co2);
+            if (bln_mincarbon) cpl.AddMinimize(cpl.Prod(a_co2, 1 / gfa));
             //_________________________________________________________________________
             ///////////////////////////////////////////////////////////////////////////
 
@@ -1084,7 +1085,7 @@ namespace ConsoleTest
             else
             {
                 outs.cost = cpl.ObjValue;
-                outs.carbon = cpl.GetValue(a_co2);
+                outs.carbon = cpl.GetValue(cpl.Prod(a_co2, 1 / gfa));
             }
 
             outs.x_elecpur = new double[this.horizon];
