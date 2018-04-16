@@ -53,6 +53,9 @@ namespace UrbanFormEHub
             bool carbmin = false;
             if (!DA.GetData(1, ref carbmin)) { };
 
+            double gfa = 1;
+            if (!DA.GetData(2, ref gfa)) { };
+
             double? carbcon = null;
             try
             {
@@ -62,11 +65,11 @@ namespace UrbanFormEHub
 
             if (!carbcon.IsNullOrDefault())
             {
-                Ehub ehub = new Ehub(path, carbmin, false, carbcon);
+                Ehub ehub = new Ehub(path, gfa,carbmin, false, carbcon);
             }
             else
             {
-                Ehub ehub = new Ehub(path, carbmin, false);
+                Ehub ehub = new Ehub(path, gfa, carbmin, false);
             }
 
         }
