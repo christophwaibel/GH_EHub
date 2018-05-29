@@ -33,7 +33,7 @@ namespace UrbanFormEHub
         {
             get
             {
-                return new Guid("2b8c43ac-9fe5-4c75-bfbb-2d336287f698");
+                return new Guid("1c624dff-ad36-4ed0-86ad-1115bc666047");
             }
         }
 
@@ -42,7 +42,7 @@ namespace UrbanFormEHub
             get
             {
                 //Return a string identifying you or your company.
-                return "Empa";
+                return "";
             }
         }
         public override string AuthorContact

@@ -10,9 +10,9 @@ using Rhino.PlugIns;
 [assembly: AssemblyTitle("UrbanFormEHub")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("Empa")]
+[assembly: AssemblyCompany("")]
 [assembly: AssemblyProduct("UrbanFormEHub")]
-[assembly: AssemblyCopyright("Copyright © Empa 2018")]
+[assembly: AssemblyCopyright("Copyright ©  2018")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
@@ -22,7 +22,7 @@ using Rhino.PlugIns;
 [assembly: ComVisible(false)]
 
 // The following GUID is for the ID of the typelib if this project is exposed to COM
-[assembly: Guid("75ca99f1-9a13-4ab5-b94a-9d27c1736acd")] // This will also be the Guid of the Rhino plug-in
+[assembly: Guid("b20c482c-6880-439d-a359-f361b491c005")] // This will also be the Guid of the Rhino plug-in
 
 // Version information for an assembly consists of the following four values:
 //
