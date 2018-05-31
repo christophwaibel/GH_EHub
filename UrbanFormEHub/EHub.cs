@@ -362,20 +362,26 @@ namespace UrbanFormEHub
         /// <param name="crbmin">minimize carbon, instead of cost?</param>
         /// <param name="minpartload">activate minimum partload for CHP?</param>
         /// <param name="crbconstr">carbon constraint</param>
-        internal Ehub(string path, double gfa, bool crbmin, bool minpartload, double? crbconstr = null)
+        internal Ehub(bool crbmin, bool minpartload, double gfa, double crbconstr, List<double> _elec, List<double> _cool, List<double> _sh, List<double> _dhw,
+            List<double> _feedin, List<double> _grid, List<double> _carbon, List<double> _temp, List<double> _pvarea, List<List<double>> _solpot,
+            double _maxbat, double _maxTES)
         {
             // ===================================================================
             // Pre-processing. Loading profiles etc.
             // ===================================================================
             //load profiles
-            this.ReadInput(path,
+            this.ReadInput(_elec,_cool,_sh,_dhw,_feedin,_grid,_carbon,_temp,_pvarea,_solpot,
                 out this.d_elec, out this.d_sh, out this.d_dhw,
                 out this.d_cool, out this.c_grid, out this.c_feedin, out this.a_carbon,
                 out this.a_solar, out this.b_solar_area, out this.c_pv_eff,
                 out this.c_st_eff_sh, out this.c_st_eff_dhw,
                 out this.c_hp_eff_sh, out this.c_hp_eff_dhw, out this.c_ac_eff,
-                out this.b_peakcool, out this.b_peaksh, out this.b_peakdhw, out this.b_peakelec,
-                out this.maxBatcap, out this.maxTEScap);
+                out this.b_peakcool, out this.b_peaksh, out this.b_peakdhw, out this.b_peakelec);
+
+            
+            this.maxBatcap = _maxbat;
+            this.maxTEScap = _maxTES;
+
 
             //reduce horizon to 6 weeks
             this.ReduceHorizon_6weeks(ref this.d_elec, ref this.d_sh, ref this.d_dhw,
@@ -1263,7 +1269,8 @@ namespace UrbanFormEHub
         /// <param name="HP_COP_sh"></param>
         /// <param name="HP_COP_dhw"></param>
         /// <param name="AC_COP"></param>
-        private void ReadInput(string path,
+        private void ReadInput(List<double> _elec, List<double> _cool, List<double> _sh, List<double> _dhw, List<double> _feedin, List<double> _grid, 
+            List<double> _carbon, List<double> _temp, List<double> _pvarea, List<List<double>> _solpot,
             out double[] elec_demand,
             out double[] SH_demand, out double[] DHW_demand,
             out double[] cool_demand,
@@ -1273,8 +1280,7 @@ namespace UrbanFormEHub
             out  double[][] ST_efficiency_sh, out double[][] ST_efficiency_dhw,
             out double[] HP_COP_sh, out double[] HP_COP_dhw,
             out double[] AC_COP,
-            out double peakcool, out double peaksh, out double peakdhw, out double peakelec,
-            out double maxBatCap, out double maxTESCap)
+            out double peakcool, out double peaksh, out double peakdhw, out double peakelec)
         {
             // 8 input profiles:
             // 0: elec                                      -> elec_demand.csv
@@ -1290,159 +1296,62 @@ namespace UrbanFormEHub
 
 
             // 0: elec_demand
-            using (var reader = new StreamReader(path + @"inputs\elec_demand.csv"))
-            {
-                List<double> listA = new List<double>();
-                while (!reader.EndOfStream)
-                {
-                    var line = reader.ReadLine();
-                    listA.Add(Convert.ToDouble(line));
-                }
-                elec_demand = listA.ToArray();
-            }
+            elec_demand = new double[_elec.Count];
+            elec_demand = _elec.ToArray();
             peakelec = elec_demand.Max();
 
             int horizon = elec_demand.Length;
 
             // 1: SH_demand
-            using (var reader = new StreamReader(path + @"inputs\sh_demand.csv"))
-            {
-                List<double> listA = new List<double>();
-                while (!reader.EndOfStream)
-                {
-                    var line = reader.ReadLine();
-                    listA.Add(Convert.ToDouble(line));
-                }
-                SH_demand = listA.ToArray();
-            }
+            SH_demand = new double[horizon];
+            SH_demand = _sh.ToArray();
             peaksh = SH_demand.Max();
 
             // 2: DHW_demand
-            using (var reader = new StreamReader(path + @"inputs\dhw_demand.csv"))
-            {
-                List<double> listA = new List<double>();
-                while (!reader.EndOfStream)
-                {
-                    var line = reader.ReadLine();
-                    listA.Add(Convert.ToDouble(line));
-                }
-                DHW_demand = listA.ToArray();
-            }
+            DHW_demand = new double[horizon];
+            DHW_demand = _dhw.ToArray();
             peakdhw = DHW_demand.Max();
 
             // 3: cool_demand
-            using (var reader = new StreamReader(path + @"inputs\cool_demand.csv"))
-            {
-                List<double> listA = new List<double>();
-                while (!reader.EndOfStream)
-                {
-                    var line = reader.ReadLine();
-                    listA.Add(Convert.ToDouble(line));
-                }
-                cool_demand = listA.ToArray();
-            }
+            cool_demand = new double[horizon];
+            cool_demand = _cool.ToArray();
             peakcool = cool_demand.Max();
 
             // 4: grid_price
-            using (var reader = new StreamReader(path + @"inputs\grid.csv"))
-            {
-                List<double> listA = new List<double>();
-                while (!reader.EndOfStream)
-                {
-                    var line = reader.ReadLine();
-                    listA.Add(Convert.ToDouble(line));
-                }
-                grid_price = listA.ToArray();
-            }
+            grid_price = new double[horizon];
+            grid_price = _grid.ToArray();
+
 
             // 5: feedin_price
-            using (var reader = new StreamReader(path + @"inputs\feedin.csv"))
-            {
-                List<double> listA = new List<double>();
-                while (!reader.EndOfStream)
-                {
-                    var line = reader.ReadLine();
-                    listA.Add(Convert.ToDouble(line));
-                }
-                feedin_price = listA.ToArray();
-            }
+            feedin_price = new double[horizon];
+            feedin_price = _feedin.ToArray();
 
             // 6: carbon
-            using (var reader = new StreamReader(path + @"inputs\carbon.csv"))
-            {
-                List<double> listA = new List<double>();
-                while (!reader.EndOfStream)
-                {
-                    var line = reader.ReadLine();
-                    listA.Add(Convert.ToDouble(line));
-                }
-                carbon = listA.ToArray();
-            }
+            carbon = new double[horizon];
+            carbon = _carbon.ToArray();
 
 
             //pv area; defines also how many solar potentials exist
-            pv_area = new double[0];
-            using (StreamReader file = new StreamReader(path + @"inputs\solar_AREAS.txt"))
-            {
-                while (!file.EndOfStream)
-                {
-                    var line = file.ReadLine();
-                    char[] delimiters = new char[] { ';' };
-                    string[] parts = line.Split(delimiters);
-                    pv_area = new double[parts.Length];
-                    for (int i = 0; i < parts.Length; i++)
-                    {
-                        pv_area[i] = Convert.ToDouble(parts[i]);
-                    }
-                }
-                file.Close();
-            }
+            pv_area = new double[_pvarea.Count];
+            pv_area = _pvarea.ToArray();
+
 
 
             //pv containts multiple sensor point profiles at different facade patches.
             // 7: pv potentials
             solar = new double[pv_area.Length][];
-            using (var reader = new StreamReader(path + @"inputs\solar_pot.csv"))       //lines -> 8760 timesteps. columns -> profiles for each sensor point
+            for (int i = 0; i < solar.Length; i++)
             {
-                List<List<double>> listA = new List<List<double>>();
-                for (int i = 0; i < solar.Length; i++)
-                {
-                    listA.Add(new List<double>());
-                }
-
-                while (!reader.EndOfStream)
-                {
-                    var line = reader.ReadLine();
-                    char[] delimiters = new char[] { ';' };
-                    string[] parts = line.Split(delimiters);
-                    for (int i = 0; i < solar.Length; i++)
-                    {
-                        listA[i].Add(Convert.ToDouble(parts[i]));
-                    }
-                }
-                for (int i = 0; i < solar.Length; i++)
-                {
-                    solar[i] = listA[i].ToArray();
-                }
+                solar[i] = new double[horizon];
+                solar[i] = _solpot[i].ToArray();
             }
-
-
+            
 
 
 
             //load ambient temperature
-            double[] temperature;
-            using (var reader = new StreamReader(path + @"inputs\ambient_temperature.txt"))
-            {
-                List<double> listA = new List<double>();
-                while (!reader.EndOfStream)
-                {
-                    var line = reader.ReadLine();
-                    listA.Add(Convert.ToDouble(line));
-                }
-                temperature = listA.ToArray();
-            }
-
+            double[] temperature = new double[horizon];
+            temperature = _temp.ToArray();
 
 
 
@@ -1466,21 +1375,6 @@ namespace UrbanFormEHub
 
             // AC efficiency
             AC_COP = calc_AC_COP(temperature);
-
-
-
-            //load max storage capacities
-            using (var reader = new StreamReader(path + @"inputs\storagecap.txt"))
-            {
-                List<double> listA = new List<double>();
-                while (!reader.EndOfStream)
-                {
-                    var line = reader.ReadLine();
-                    listA.Add(Convert.ToDouble(line));
-                }
-                maxBatCap = listA[0];
-                maxTESCap = listA[1];
-            }
 
         }
 
