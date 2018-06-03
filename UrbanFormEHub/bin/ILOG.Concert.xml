@@ -37,31 +37,6 @@
              created without an assigned name unless a name is specified in the
              construction.</p></remarks>
         </member>
-        <member name="T:ILOG.Concert.ICopyable">
-            <summary>
-            This interface defines the API for elements of optimization models, such
-            as variables, constraints, expressions, and objectives. 
-            </summary>
-            <remarks>Objects of classes implementing this interface can be copied when needed to an
-            application using IBM ILOG Concert Technology for .NET. All objects used
-            for describing an optimization model implement this interface.</remarks>
-        </member>
-        <member name="M:ILOG.Concert.ICopyable.MakeClone(ILOG.Concert.CloneManager)">
-            <summary>
-            This method must be implemented so that it copies the invoking object
-            to the engine of the given copy manager using the copy manager.
-            </summary>
-        </member>
-        <member name="M:ILOG.Concert.ICopyable.VisitChildren(ILOG.Concert.ICopyableVisitor)">
-            <summary>
-            This method is called when the object and all its sub-objects must be
-            visited. To implement this method, you should first call the method
-            <c>ICopyableVisitor.BeginVisit()</c> with yourself as parameter,
-            then call <c>ICopyableVisitor.VisitChild()</c> for each
-            sub-copyables, the call <c>ICopyableVisitor.EndVisit()</c> once
-            again with yourself as parameter.
-            </summary>
-        </member>
         <member name="P:ILOG.Concert.IAddable.Name">
                <summary>
                Accesses/sets the name assigned to the invoking modeling object. If the
@@ -80,89 +55,6 @@
              The constraints in an and-constraint can be queried by the 
              enumerator returned by the method <c>enumerator</c>.
              </p></remarks>
-        </member>
-        <member name="T:ILOG.Concert.IConstraint">
-              <summary>
-              This interface defines the API for constraints.
-              </summary>
-             <remarks>Instances of <c>IConstraint</c>
-              are <c>IAddable</c> objects and can be added to an <c>IModel</c>.
-              Not all modeling objects are instances of <c>IConstraint</c>, for example,
-              <c>IObjective</c> is not a constraint.
-              Examples of constraints are <c>IRange</c> and
-              <c>IloLPMatrix</c>. <c>IloLPMatrix</c> is available to users of CPLEX.
-            
-              <seealso cref="T:ILOG.Concert.IAddable"/><seealso cref="T:ILOG.Concert.IModel"/>
-              </remarks>
-              
-        </member>
-        <member name="T:ILOG.Concert.IIntExpr">
-              <summary>
-              This is the basic public interface for integer expressions.
-              </summary>
-             <remarks>Integer
-              expressions are represented using objects of type <c>IIntExpr</c>.
-              They are guaranteed to contain only variables of type <c>integer</c>
-              and perform integer arithmetic. Integer expressions are created
-              using integer variables and values with the numerical operations
-              provided in <c>IModeler</c>.
-              <p>
-              Integer expressions and general expressions can be mixed. This is
-              achieved by defining the interface <c>IIntExpr</c> as an
-              extension of <c>INumExpr</c>. However, when an integer
-              expression is used as an instance of <c>INumExpr</c>, the compile-time
-              information is lost. For some optimizers, this will incur a runtime
-              overhead because the type information needs to be regained at
-              run time. This is documented for the optimizers where it is relevant.</p>
-            
-              <seealso cref="M:ILOG.Concert.IModeler.Negative"/>
-              <seealso cref="M:ILOG.Concert.IModeler.Diff(Int32, IIntExpr)"/>
-              <seealso cref="M:ILOG.Concert.IModeler.Diff(IIntExpr, IIntExpr)"/>
-              <seealso cref="M:ILOG.Concert.IModeler.Diff(IIntExpr, Int32)"/>
-              <seealso cref="M:ILOG.Concert.IModeler.Prod(Int32, IIntExpr)"/>
-              <seealso cref="M:ILOG.Concert.IModeler.Prod(IIntExpr, IIntExpr)"/>
-              <seealso cref="M:ILOG.Concert.IModeler.Prod(IIntExpr, Int32)"/>
-              <seealso cref="M:ILOG.Concert.IModeler.Sum(Int32, IIntExpr)"/>
-              <seealso cref="M:ILOG.Concert.IModeler.Sum(IIntExpr, IIntExpr)"/>
-              <seealso cref="M:ILOG.Concert.IModeler.Sum(IIntExpr, Int32)"/>
-              <seealso cref="M:ILOG.Concert.IModeler.IntVar"/>
-              </remarks>
-              
-        </member>
-        <member name="T:ILOG.Concert.INumExpr">
-             <summary>
-             This is the public basic interface for all numerical expressions.
-             </summary>
-            <remarks>  Numerical expressions are represented by objects implementing this
-             interface. They are constructed using the expression operator functions
-             defined in the interface <c>IModel</c> or one of its extensions.
-             <para>
-             IBM ILOG Concert Technology distinguishes integer expressions that are built
-             solely from integer variables and use only integer values. Integer
-             expressions are represented by the interface <c>IIntExpr</c>, an
-             extension of <c>INumExpr</c>. Integer expressions can be used
-             wherever general expressions of type <c>INumExpr</c> are
-             expected.</para>
-             <para>
-             Variables defined by the interface <c>INumVar</c> or
-             <c>IIntVar</c> are also extensions of <c>INumExpr</c>. Therefore,
-             variables can be used wherever general expressions are expected.</para>
-             <seealso cref="M:ILOG.Concert.IModeler.Diff(Double, INumExpr)"/>
-             <seealso cref="M:ILOG.Concert.IModeler.Diff(INumExpr, INumExpr)"/>
-             <seealso cref="M:ILOG.Concert.IModeler.Diff(INumExpr, Double)"/>
-             <seealso cref="M:ILOG.Concert.IModeler.Prod(Double, INumExpr)"/>
-             <seealso cref="M:ILOG.Concert.IModeler.Prod(INumExpr, INumExpr)"/>
-             <seealso cref="M:ILOG.Concert.IModeler.Prod(INumExpr, Double)"/>
-             <seealso cref="M:ILOG.Concert.IModeler.Sum(Double, INumExpr)"/>
-             <seealso cref="M:ILOG.Concert.IModeler.Sum(INumExpr, INumExpr)"/>
-             <seealso cref="M:ILOG.Concert.IModeler.Sum(INumExpr, Double)"/>
-             <seealso cref="T:ILOG.Concert.IIntVar"/>
-             <seealso cref="T:ILOG.Concert.ILinearIntExpr"/>
-             <seealso cref="T:ILOG.Concert.IIntExpr"/>
-             <seealso cref="T:ILOG.Concert.INumVar"/>
-             <seealso cref="T:ILOG.Concert.ILinearNumExpr"/>
-             </remarks>
-             
         </member>
         <member name="M:ILOG.Concert.IAnd.Add(ILOG.Concert.IConstraint)">
              <summary>
@@ -267,10 +159,50 @@
              <c>Delete</c> is called on the invoking instance of 
              <c>IAnd</c>. </p></remarks>
         </member>
+        <member name="T:ILOG.Concert.IConstraint">
+              <summary>
+              This interface defines the API for constraints.
+              </summary>
+             <remarks>Instances of <c>IConstraint</c>
+              are <c>IAddable</c> objects and can be added to an <c>IModel</c>.
+              Not all modeling objects are instances of <c>IConstraint</c>, for example,
+              <c>IObjective</c> is not a constraint.
+              Examples of constraints are <c>IRange</c> and
+              <c>IloLPMatrix</c>. <c>IloLPMatrix</c> is available to users of CPLEX.
+            
+              <seealso cref="T:ILOG.Concert.IAddable"/><seealso cref="T:ILOG.Concert.IModel"/>
+              </remarks>
+              
+        </member>
         <member name="T:ILOG.Concert.ICopyableVisitor">
             <summary>
             A visitor of ICopyable. See <c>ICopyable.VisitChildren</c> for details.
             <seealso cref="M:ILOG.Concert.ICopyable.VisitChildren"/></summary>
+        </member>
+        <member name="T:ILOG.Concert.ICopyable">
+            <summary>
+            This interface defines the API for elements of optimization models, such
+            as variables, constraints, expressions, and objectives. 
+            </summary>
+            <remarks>Objects of classes implementing this interface can be copied when needed to an
+            application using IBM ILOG Concert Technology for .NET. All objects used
+            for describing an optimization model implement this interface.</remarks>
+        </member>
+        <member name="M:ILOG.Concert.ICopyable.MakeClone(ILOG.Concert.CloneManager)">
+            <summary>
+            This method must be implemented so that it copies the invoking object
+            to the engine of the given copy manager using the copy manager.
+            </summary>
+        </member>
+        <member name="M:ILOG.Concert.ICopyable.VisitChildren(ILOG.Concert.ICopyableVisitor)">
+            <summary>
+            This method is called when the object and all its sub-objects must be
+            visited. To implement this method, you should first call the method
+            <c>ICopyableVisitor.BeginVisit()</c> with yourself as parameter,
+            then call <c>ICopyableVisitor.VisitChild()</c> for each
+            sub-copyables, the call <c>ICopyableVisitor.EndVisit()</c> once
+            again with yourself as parameter.
+            </summary>
         </member>
         <member name="T:ILOG.Concert.CloneManager">
             <summary>
@@ -286,34 +218,104 @@
              collections.
              </summary>
         </member>
-        <member name="P:ILOG.Concert.INumVar.Type">
-               <summary>
-               Queries/sets the type of the invoking <c>INumVar</c> object.
-               </summary>
+        <member name="T:ILOG.Concert.IIntExpr">
+              <summary>
+              This is the basic public interface for integer expressions.
+              </summary>
+             <remarks>Integer
+              expressions are represented using objects of type <c>IIntExpr</c>.
+              They are guaranteed to contain only variables of type <c>integer</c>
+              and perform integer arithmetic. Integer expressions are created
+              using integer variables and values with the numerical operations
+              provided in <c>IModeler</c>.
+              <p>
+              Integer expressions and general expressions can be mixed. This is
+              achieved by defining the interface <c>IIntExpr</c> as an
+              extension of <c>INumExpr</c>. However, when an integer
+              expression is used as an instance of <c>INumExpr</c>, the compile-time
+              information is lost. For some optimizers, this will incur a runtime
+              overhead because the type information needs to be regained at
+              run time. This is documented for the optimizers where it is relevant.</p>
+            
+              <seealso cref="M:ILOG.Concert.IModeler.Negative"/>
+              <seealso cref="M:ILOG.Concert.IModeler.Diff(Int32, IIntExpr)"/>
+              <seealso cref="M:ILOG.Concert.IModeler.Diff(IIntExpr, IIntExpr)"/>
+              <seealso cref="M:ILOG.Concert.IModeler.Diff(IIntExpr, Int32)"/>
+              <seealso cref="M:ILOG.Concert.IModeler.Prod(Int32, IIntExpr)"/>
+              <seealso cref="M:ILOG.Concert.IModeler.Prod(IIntExpr, IIntExpr)"/>
+              <seealso cref="M:ILOG.Concert.IModeler.Prod(IIntExpr, Int32)"/>
+              <seealso cref="M:ILOG.Concert.IModeler.Sum(Int32, IIntExpr)"/>
+              <seealso cref="M:ILOG.Concert.IModeler.Sum(IIntExpr, IIntExpr)"/>
+              <seealso cref="M:ILOG.Concert.IModeler.Sum(IIntExpr, Int32)"/>
+              <seealso cref="M:ILOG.Concert.IModeler.IntVar"/>
+              </remarks>
+              
         </member>
-        <member name="P:ILOG.Concert.INumVar.LB">
-               <summary>
-               Queries/sets the lower bound of the invoking <c>INumVar</c> object.
-               </summary>
-        </member>
-        <member name="P:ILOG.Concert.INumVar.UB">
-               <summary>
-               Queries/sets the upper bound of the invoking <c>INumVar</c> object.
-               </summary>
-        </member>
-        <member name="P:ILOG.Concert.INumVar.Name">
-               <summary>
-               Queries/sets the name of the invoking variable.
-               </summary>
+        <member name="T:ILOG.Concert.IIntVar">
+             <summary>
+             This interface defines the API for integer variables.
+             </summary>
+             <remarks>
+             <p>Objects of this type
+             represent integer modeling variables.</p>
+             <p>
+             Variables are characterized by their bounds and their type. The bounds can
+             be changed after construction using the methods <c>setLB()</c> and <c>setUB()</c>.
+             However, the type of a variable cannot be changed after construction. The
+             type of an integer variable will be <c>NumVarType.Int</c>
+             throughout its lifetime.</p>
+             <p>
+             Variables may be assigned a name using the property <c>Name()</c>. The
+             name can be queried in the same manner. Assigning
+             a name is not required. By default, newly created variables will be created
+             without an assigned name unless a name is specified in the construction.</p>
+             <p>
+             Unlike other modeling objects of type <c>IAddable</c>, variables
+             cannot be added directly to a model. Variables can only be part of a model
+             implicitly, when they are used by another modeling object such as a
+             constraint that has been added to the model.</p>
+             <p>
+             Integer variables are generally created using any of the following methods.
+             Note that <c>Cplex</c> is available to users of CPLEX(R).</p>
+             <ul>
+              <li>IModeler.IntVar()</li>
+              <li>IModeler.IntVarArray()</li>
+              <li>Cplex.intVar()</li>
+              <li>Cplex.intVarArray()</li>
+              <li>IModeler.BoolVar()</li>
+              <li>IModeler.BoolVarArray()</li>
+              <li>Cplex.boolVar()</li>
+              <li>Cplex.boolVarArray()</li>
+             </ul>
+             <p>Integer variables can also be created with the methods:
+             <c>IModeler.numVar(), IModeler.NumVarArray(), IloMPModeler.NumVar(),</c>
+             and <c>IloMPModeler.NumVarArray()</c> by passing a parameter to variable type
+             <c>NumVarType.Int</c> or <c>NumVarType.Bool</c>. However,
+             this causes the compile-time information about the type of the variable to be lost.
+             This may incur a runtime overhead when used with certain optimizers.
+             This is documented for the optimizers only where it is relevant.</p>
+             <p>
+             As with numerical variables, <c>INumVar</c> integer variables can be
+             created separately or in a column-wise way. This means that when a
+             variable is created it is immediately installed in existing modeling
+             objects. Use objects of type <c>IColumn</c> to
+             achieve this.</p>  
+            </remarks>
+             <see cref="M:ILOG.Concert.IModeler.IntVarArray(System.Int32,System.Int32,System.Int32)"/>
+            <see cref="M:ILOG.Concert.IModeler.IntVar(System.Int32,System.Int32,System.String)"/>
+            <see cref="T:ILOG.Concert.IIntExpr"/>
+            <see cref="T:ILOG.Concert.INumExpr"/>
+            <see cref="T:ILOG.Concert.NumVarType"/>
+            <see cref="T:ILOG.Concert.INumVar"/> 
         </member>
         <member name="P:ILOG.Concert.IIntVar.Min">
                <summary>
-               Accesses/sets the initial minimum value for this integer variable.
+               Accesses and sets the initial minimum value for this integer variable.
                </summary>
         </member>
         <member name="P:ILOG.Concert.IIntVar.Max">
                <summary>
-               Accesses/sets the initial maximum value for this integer variable.
+               Accesses and sets the initial maximum value for this integer variable.
                </summary>
         </member>
         <member name="T:ILOG.Concert.ILinearIntExpr">
@@ -508,6 +510,11 @@
              <c>0</c> expression behind.
              </summary>
         </member>
+        <member name="P:ILOG.Concert.ILinearIntExpr.Constant">
+               <summary>
+               Queries the constant term from the invoking <c>ILinearIntExpr</c>.
+               </summary>
+        </member>
         <member name="M:ILOG.Concert.ILinearIntExpr.Remove(ILOG.Concert.IIntVar)">
              <summary>
              Removes a variable from the invoking <c>ILinearIntExpr</c> expression.
@@ -570,11 +577,6 @@
              An enumerator also allows the caller to remove elements from the underlying
              <c>ILinearIntExpr</c> during the iteration with well-defined
              semantics.</remarks>
-        </member>
-        <member name="P:ILOG.Concert.ILinearIntExpr.Constant">
-               <summary>
-               Queries the constant term from the invoking <c>ILinearIntExpr</c>.
-               </summary>
         </member>
         <member name="T:ILOG.Concert.ILinearIntExprEnumerator">
              <summary>
@@ -798,6 +800,11 @@
              expression behind.
              </summary>
         </member>
+        <member name="P:ILOG.Concert.ILinearNumExpr.Constant">
+               <summary>
+               Queries the constant term from the invoking <c>ILinearIntExpr</c>.
+               </summary>
+        </member>
         <member name="M:ILOG.Concert.ILinearNumExpr.Remove(ILOG.Concert.INumVar)">
               <summary>
               Removes a variable from the invoking <c>ILinearNumExpr</c> expression.
@@ -855,11 +862,6 @@
              Returns an enumerator for the variables in the invoking <c>ILinearNumExpr</c>
              expression.
              </summary>
-        </member>
-        <member name="P:ILOG.Concert.ILinearNumExpr.Constant">
-               <summary>
-               Queries the constant term from the invoking <c>ILinearIntExpr</c>.
-               </summary>
         </member>
         <member name="T:ILOG.Concert.ILinearNumExprEnumerator">
              <summary>
@@ -950,7 +952,7 @@
               multiple times, only one instance is removed from the model.
             
               </remarks>
-              <param name="object">The modeling object to be removed from the invoking
+              <param name="obj">The modeling object to be removed from the invoking
                                 <c>IModel</c>.</param>
         </member>
         <member name="M:ILOG.Concert.IModel.Remove(ILOG.Concert.IAddable[])">
@@ -1005,8 +1007,7 @@
              basic optimization
              models. This interface contains methods for constructing variables, basic
              constraints, and objective function objects. It is typically implemented by
-             such optimizer classes as <c>IloCplex</c>, available in ILOG CPLEX
-             or <c>IloSolverFactory</c>, available in ILOG JSolver.
+             such optimizer classes as <c>IloCplex</c>, available in ILOG CPLEX.
              By using this interface rather than the actual implementation class,
              you can create optimization models that can be solved by any optimizer
              implementing the interface.
@@ -1019,12 +1020,12 @@
              model the optimizer will solve using its <c>solve</c> method.
              </p><p>
              There are two interfaces derived from <c>IModeler</c>:
-             <c>IloCPModeler</c>, available in ILOG JSolver, 
-             and <c>IloMPModeler</c>, available in ILOG CPLEX.
-             <c>IloCPModeler</c> defines the API for constraint-based engines. 
+             <c>CP</c>, available in CP Optimizer, 
+             and <c>Cplex</c>, available in CPLEX.
+             <c>CP</c> defines the API for constraint-based engines. 
              (An engine is an object whose
              function is to manipulate models that include variables and constraints.)
-             <c>IloMPModeler</c> is a modeling interface for 
+             <c>Cplex</c> is a modeling interface for 
              Mathematical Programming.
              It adds support for several new modeling object interfaces, including LP
              matrices, semi-continuous variables, and special ordered sets (SOSs). It
@@ -1033,7 +1034,7 @@
              expressions of ranged
              constraints and objective functions.</p>
               
-             @internal opl</remarks>
+            </remarks>
         </member>
         <member name="M:ILOG.Concert.IModeler.NumVar(System.Double,System.Double,ILOG.Concert.NumVarType,System.String)">
              <summary>
@@ -2209,6 +2210,16 @@
                                <c>vars2</c> to be used for the scalar product.
             </param>
             <returns>The new linear expression.</returns>
+        </member>
+        <member name="M:ILOG.Concert.IModeler.Negative(ILOG.Concert.IIntExpr)">
+             <summary>
+             Creates and returns the new expression <c>-e</c>,
+             the negation of the expression <c>e</c>.
+             </summary>
+            <param name="e">An integer expression for which the negative value is given.
+             </param>
+             <returns>An integer expression representing the 
+                       negation of <c>e</c>.</returns>
         </member>
         <member name="M:ILOG.Concert.IModeler.Sum(ILOG.Concert.IIntExpr,System.Int32)">
              <summary>
@@ -3603,15 +3614,13 @@
               </returns>
         </member>
         <member name="M:ILOG.Concert.IModeler.And">
-            
-             <remarks>
-             Creates an <c>IAnd</c> constraint suitable for grouping
-             other constraints or building logical constraints.  Constraints can be
-             added and removed to the <c>IAnd</c> constraint by using its
-             methods <c>Add</c> and <c>Remove</c>.
-             
-             </remarks>
-             <see cref="T:ILOG.Concert.IAnd"/>
+            <summary>
+            Creates an <c>IAnd</c> constraint suitable for grouping
+            other constraints or building logical constraints.  Constraints can be
+            added and removed to the <c>IAnd</c> constraint by using its
+            methods <c>Add</c> and <c>Remove</c>.
+            </summary>
+            <see cref="T:ILOG.Concert.IAnd"/>
         </member>
         <member name="M:ILOG.Concert.IModeler.And(ILOG.Concert.IConstraint[])">
              <summary>
@@ -3798,6 +3807,85 @@
              returned constraint.
              </summary>
         </member>
+        <member name="T:ILOG.Concert.INumExpr">
+             <summary>
+             This is the public basic interface for all numerical expressions.
+             </summary>
+            <remarks>  Numerical expressions are represented by objects implementing this
+             interface. They are constructed using the expression operator functions
+             defined in the interface <c>IModel</c> or one of its extensions.
+             <para>
+             IBM ILOG Concert Technology distinguishes integer expressions that are built
+             solely from integer variables and use only integer values. Integer
+             expressions are represented by the interface <c>IIntExpr</c>, an
+             extension of <c>INumExpr</c>. Integer expressions can be used
+             wherever general expressions of type <c>INumExpr</c> are
+             expected.</para>
+             <para>
+             Variables defined by the interface <c>INumVar</c> or
+             <c>IIntVar</c> are also extensions of <c>INumExpr</c>. Therefore,
+             variables can be used wherever general expressions are expected.</para>
+             <seealso cref="M:ILOG.Concert.IModeler.Diff(Double, INumExpr)"/>
+             <seealso cref="M:ILOG.Concert.IModeler.Diff(INumExpr, INumExpr)"/>
+             <seealso cref="M:ILOG.Concert.IModeler.Diff(INumExpr, Double)"/>
+             <seealso cref="M:ILOG.Concert.IModeler.Prod(Double, INumExpr)"/>
+             <seealso cref="M:ILOG.Concert.IModeler.Prod(INumExpr, INumExpr)"/>
+             <seealso cref="M:ILOG.Concert.IModeler.Prod(INumExpr, Double)"/>
+             <seealso cref="M:ILOG.Concert.IModeler.Sum(Double, INumExpr)"/>
+             <seealso cref="M:ILOG.Concert.IModeler.Sum(INumExpr, INumExpr)"/>
+             <seealso cref="M:ILOG.Concert.IModeler.Sum(INumExpr, Double)"/>
+             <seealso cref="T:ILOG.Concert.IIntVar"/>
+             <seealso cref="T:ILOG.Concert.ILinearIntExpr"/>
+             <seealso cref="T:ILOG.Concert.IIntExpr"/>
+             <seealso cref="T:ILOG.Concert.INumVar"/>
+             <seealso cref="T:ILOG.Concert.ILinearNumExpr"/>
+             </remarks>
+             
+        </member>
+        <member name="T:ILOG.Concert.INumVar">
+              <summary>
+              This interface defines the API for numerical variables of any type.
+              </summary>
+             <remarks>  <p>Objects implementing this interface are used to represent modeling
+              variables in ILOG Concert Technology for Java. A modeling variable
+              is characterized by its lower and upper bounds as well as by its type.
+              Possible types are:</p>
+              <ul>
+              <li> <c>NumVarType.Float</c></li>
+              <li> <c>NumVarType.Int</c></li>
+              <li> <c>NumVarType.Bool</c></li>
+              </ul><p>
+              The bounds of a variable can be changed after the variable has been
+              constructed, but its type remains fixed throughout the lifetime of the
+              variable object.</p>
+            
+              </remarks>
+              <see cref="T:ILOG.Concert.IIntVar"/><see cref="T:ILOG.Concert.NumVarType"/> 
+              @internal jconfig
+              @internal opl
+        </member>
+        <member name="P:ILOG.Concert.INumVar.Type">
+               <summary>
+               Queries/sets the type of the invoking <c>INumVar</c> object.
+               </summary>
+            <returns>The type of the variable.</returns>
+        </member>
+        <member name="P:ILOG.Concert.INumVar.LB">
+               <summary>
+               Queries/sets the lower bound of the invoking <c>INumVar</c> object.
+               </summary>
+            <returns>The lower bound of the variable.</returns>
+        </member>
+        <member name="P:ILOG.Concert.INumVar.UB">
+               <summary>
+               Queries/sets the upper bound of the invoking <c>INumVar</c> object.
+               </summary>
+        </member>
+        <member name="P:ILOG.Concert.INumVar.Name">
+               <summary>
+               Queries/sets the name of the invoking variable.
+               </summary>
+        </member>
         <member name="T:ILOG.Concert.IObjective">
               <summary>
               This interface defines the API for objectives.
@@ -3809,10 +3897,10 @@
               <c>ObjectiveSense.Maximize</c>.
               <p>
               Both the objective sense and expression can be queried and reset.
-              In addition to this, the CPLEX class <c>IloMPModeler</c> provides methods
+              In addition to this, the CPLEX class <c>Cplex</c> provides methods
               for manipulating linear objective expressions through its methods
               <c>setLinearCoef()</c> and <c>setLinearCoefs()</c>.
-              <c>IloMPModeler</c> is available to users of ILOG CPLEX.</p>
+              <c>Cplex</c> is available to users of ILOG CPLEX.</p>
             
               
               
@@ -3821,7 +3909,7 @@
               
               
               </remarks>
-              <see cref="T:ILOG.Concert.ObjectiveSense"/><see cref="!:IModeler.addObjective(ObjectiveSense, INumExpr)"/><see cref="!:IModeler.addMaximize(INumExpr)"/><see cref="!:IModeler.addMinimize(INumExpr)"/><see cref="!:IModeler.objective(ObjectiveSense, INumExpr)"/><see cref="!:IModeler.maximize(INumExpr)"/><see cref="!:IModeler.minimize(INumExpr)"/>
+              <see cref="T:ILOG.Concert.ObjectiveSense"/><see cref="M:ILOG.Concert.IModeler.AddObjective(ILOG.Concert.ObjectiveSense,ILOG.Concert.INumExpr)"/><see cref="M:ILOG.Concert.IModeler.AddMaximize(ILOG.Concert.INumExpr)"/><see cref="M:ILOG.Concert.IModeler.AddMinimize(ILOG.Concert.INumExpr)"/><see cref="M:ILOG.Concert.IModeler.Objective(ILOG.Concert.ObjectiveSense,ILOG.Concert.INumExpr)"/><see cref="M:ILOG.Concert.IModeler.Maximize(ILOG.Concert.INumExpr)"/><see cref="M:ILOG.Concert.IModeler.Minimize(ILOG.Concert.INumExpr)"/>
         </member>
         <member name="P:ILOG.Concert.IObjective.Sense">
                <summary>
@@ -3832,6 +3920,11 @@
                <summary>
                Queries/sets the expression of the invoking <c>IObjective</c> object.
                </summary>
+        </member>
+        <member name="M:ILOG.Concert.IObjective.ClearExpr">
+            <summary>
+            Sets the optimization expression to <c>0</c>.
+            </summary>
         </member>
         <member name="T:ILOG.Concert.IOr">
              <summary>
@@ -3950,18 +4043,46 @@
              <c>delete</c> is called on the invoking instance of 
              <c>IOr</c>. </p></remarks>
         </member>
-        <member name="M:ILOG.Concert.IRange.SetBounds(System.Double,System.Double)">
+        <member name="T:ILOG.Concert.IRange">
+             @internal jconfig
              <summary>
-             Sets the lower and upper bound of the ranged constraints.
+             This is the interface for modeling objects representing ranged
+             constraints of the format <c>lb &lt;= expr &lt;= ub</c>.
              </summary>
-            <param name="lb">The new lower bound of the ranged constraints.
-             </param>
-             <param name="ub">The new upper bound of the ranged constraints.</param>
-        </member>
-        <member name="M:ILOG.Concert.IRange.ClearExpr">
-            <summary>
-            Sets the expression of the ranged constraint to <c>0</c>.
-            </summary>
+            <remarks>
+             <p><c>lb</c> and <c>ub</c> are double values, referred
+             to as the lower bound and upper bound of the ranged constraint,
+             and <c>expr</c> is an expression. Values +- infinity
+             can be used as bounds. This allows you to use <c>IRange</c>
+             objects to represent more commonly used constraints:
+             </p>
+             <ul>
+             <li>for <c>expr == rhs</c>, set <c>lb = ub = rhs</c></li>
+             <li>for <c>expr &lt;= rhs</c>, set <c>lb = -infinity</c> and
+               <c>ub = rhs</c></li>
+             <li>for <c>expr &gt;= rhs</c>, set <c>lb = rhs </c> and
+               <c>ub = infinity</c></li>
+             </ul>
+             <p>
+             Through the selection of <c>lb</c> and <c>ub</c>, constraints
+             usually written as <c>expr ~ rhs</c> with <c>~</c> in
+             <c>&lt;=, &gt;=,</c> or <c>==</c> can also be expressed.
+             <c>IRange</c> objects
+             can be constructed using a variety of methods
+             defined for <c>IModeler: AddRange(), AddEq(), AddLe(), AddGe(),
+             Range(), Eq(), Le()</c>, and <c>Ge()</c>. The methods of
+             <c>IRange</c> allow you to query the expressions and bounds of a
+             ranged constraint and to change its bounds or replace the expression. In
+             addition to this, the CPLEX methods
+             <c>Cplex.SetLinearCoef()</c> and
+             <c>Cplex.SetLinearCoefs()</c> allow you to edit the constraint
+             expression for the special case of a linear expression, as supported by
+             <c>Cplex</c>. <c>Cplex</c> is available to users
+             of ILOG CPLEX.
+             </p>
+             
+            </remarks>
+             <see cref="M:ILOG.Concert.IModeler.AddLe(ILOG.Concert.INumExpr,System.Double)"/><see cref="M:ILOG.Concert.IModeler.AddGe(ILOG.Concert.INumExpr,System.Double)"/><see cref="M:ILOG.Concert.IModeler.AddEq(ILOG.Concert.INumExpr,System.Double)"/><see cref="M:ILOG.Concert.IModeler.AddRange(System.Double,ILOG.Concert.INumExpr,System.Double)"/>
         </member>
         <member name="P:ILOG.Concert.IRange.LB">
                <summary>
@@ -3973,10 +4094,35 @@
                Queries/sets the upper bound of the ranged constraints.
                </summary>
         </member>
+        <member name="M:ILOG.Concert.IRange.SetBounds(System.Double,System.Double)">
+             <summary>
+             Sets the lower and upper bound of the ranged constraints.
+             </summary>
+            <param name="lb">The new lower bound of the ranged constraints.
+             </param>
+             <param name="ub">The new upper bound of the ranged constraints.</param>
+        </member>
         <member name="P:ILOG.Concert.IRange.Expr">
                <summary>
                Queries/sets the expression of the ranged constraint.
                </summary>
+        </member>
+        <member name="M:ILOG.Concert.IRange.ClearExpr">
+            <summary>
+            Sets the expression of the ranged constraint to <c>0</c>.
+            </summary>
+        </member>
+        <member name="T:ILOG.Concert.NumVarType">
+             <summary>
+             Objects of this class represent the type of a modeling variable.
+             </summary>
+            <remarks>Three
+             types are defined: <c>Float</c>, <c>Int</c>, and
+             <c>Bool</c>.
+             </remarks>
+        </member>
+        <member name="M:ILOG.Concert.NumVarType.GetTypeValue">
+            <exclude />
         </member>
         <member name="F:ILOG.Concert.NumVarType.Float">
             <summary>

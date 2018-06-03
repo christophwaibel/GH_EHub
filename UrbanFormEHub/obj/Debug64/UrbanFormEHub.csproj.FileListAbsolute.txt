@@ -7,3 +7,11 @@ C:\Users\Christoph\Documents\Visual Studio 2012\Projects\GHUrbanMorphologyEHub\U
 C:\Users\Christoph\Documents\Visual Studio 2012\Projects\GHUrbanMorphologyEHub\UrbanFormEHub\obj\Debug64\UrbanFormEHub.dll
 C:\Users\Christoph\Documents\Visual Studio 2012\Projects\GHUrbanMorphologyEHub\UrbanFormEHub\obj\Debug64\UrbanFormEHub.pdb
 C:\Users\Christoph\Documents\Visual Studio 2012\Projects\GHUrbanMorphologyEHub\UrbanFormEHub\obj\Debug64\UrbanFormEHub.csprojResolveAssemblyReference.cache
+C:\Users\Christoph\Documents\Visual Studio 2012\Projects\GHEHub\UrbanFormEHub\bin\UrbanFormEHub.dll
+C:\Users\Christoph\Documents\Visual Studio 2012\Projects\GHEHub\UrbanFormEHub\bin\UrbanFormEHub.pdb
+C:\Users\Christoph\Documents\Visual Studio 2012\Projects\GHEHub\UrbanFormEHub\bin\ILOG.Concert.dll
+C:\Users\Christoph\Documents\Visual Studio 2012\Projects\GHEHub\UrbanFormEHub\bin\ILOG.CPLEX.dll
+C:\Users\Christoph\Documents\Visual Studio 2012\Projects\GHEHub\UrbanFormEHub\bin\ILOG.Concert.xml
+C:\Users\Christoph\Documents\Visual Studio 2012\Projects\GHEHub\UrbanFormEHub\bin\ILOG.CPLEX.xml
+C:\Users\Christoph\Documents\Visual Studio 2012\Projects\GHEHub\UrbanFormEHub\obj\Debug64\UrbanFormEHub.dll
+C:\Users\Christoph\Documents\Visual Studio 2012\Projects\GHEHub\UrbanFormEHub\obj\Debug64\UrbanFormEHub.pdb
