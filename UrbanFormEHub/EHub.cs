@@ -15,6 +15,7 @@ namespace UrbanFormEHub
     /// </summary>
     internal struct Ehub_outputs
     {
+        internal bool infeasible;           // true, if infeasible solution
 
         internal double carbon;             // annual carbon.
         internal double cost;               // cost. levelized.
@@ -213,7 +214,7 @@ namespace UrbanFormEHub
         internal const double lca_boiler = 0.0;             // per kW installed
 
 
-        internal const double lca_gas = 0.198;                // natural gas from grid, per kWh
+        internal const double lca_gas = 0.237;                // natural gas from grid, per kWh
 
 
         // Economic data
@@ -311,7 +312,7 @@ namespace UrbanFormEHub
         internal static double c_bat_om = 0.0;
 
         //internal static double c_gas = 0.113;                    // natural gas per kWh
-        internal static double c_gas = 0.08;                    // natural gas per kWh \cite{Morvaj2017}
+        internal static double c_gas = 0.09;                    // natural gas per kWh, from Waibel eta al 2017 SBE 16 paper  //// \cite{Morvaj2017} has 0.08.
 
 
         internal const double M = 9999999;  // big M method
@@ -321,10 +322,10 @@ namespace UrbanFormEHub
         ///////////////////////////////////////////////////////////////
         // Inputs
         ///////////////////////////////////////////////////////////////
-        private double[] d_dhw;                 // domestic hot water demand [kWh]
-        private double[] d_sh;                  // space heating demand [kWh]
-        private double[] d_cool;                // cooling demand [kWh]
-        private double[] d_elec;                // electricity demand [kWh]
+        internal double[] d_dhw;                 // domestic hot water demand [kWh]
+        internal double[] d_sh;                  // space heating demand [kWh]
+        internal double[] d_cool;                // cooling demand [kWh]
+        internal double[] d_elec;                // electricity demand [kWh]
         private double[] c_grid;                // dynamic grid electricity cost [CHF/kWh]
         private double[] c_feedin;              // dynamic feedin tarif [CHF/kWh]
         private double[] a_carbon;              // dynamic carbon emission factor [g-CO2/kWh eq.]
@@ -339,7 +340,10 @@ namespace UrbanFormEHub
         private double[] c_hp_eff_sh;           // hp efficiency for space heating, time dependant
         private double[] c_ac_eff;              // ac efficiency for cooling, time dependant
 
-        private double[] c_num_of_days;            // number of days, that each typical day represents. should sum to 365. length of horizon. 24x same day.
+        private double[] c_num_of_days_DHW;            // number of days, that each typical day represents. should sum to 365. length of horizon. 24x same day.
+        private double[] c_num_of_days_SH;
+        private double[] c_num_of_days_Cool;
+        private double[] c_num_of_days_Elec;
 
         private double b_peakcool, b_peaksh, b_peakdhw, b_peakelec; //peak demands
         private double maxTEScap, maxBatcap;    // max capacities for thermal storage and battery. limited according to building floor area
@@ -352,7 +356,7 @@ namespace UrbanFormEHub
 
         #endregion
 
-
+        public bool multithreading;
 
         /// <summary>
         /// Create new energyhub object
@@ -362,15 +366,17 @@ namespace UrbanFormEHub
         /// <param name="crbmin">minimize carbon, instead of cost?</param>
         /// <param name="minpartload">activate minimum partload for CHP?</param>
         /// <param name="crbconstr">carbon constraint</param>
-        internal Ehub(bool crbmin, bool minpartload, double gfa, double crbconstr, List<double> _elec, List<double> _cool, List<double> _sh, List<double> _dhw,
+        internal Ehub(bool _multithread, bool crbmin, bool minpartload, double gfa, double crbconstr, List<double> _elec, List<double> _cool, List<double> _sh, List<double> _dhw,
             List<double> _feedin, List<double> _grid, List<double> _carbon, List<double> _temp, List<double> _pvarea, List<List<double>> _solpot,
-            double _maxbat, double _maxTES)
+            double _maxbat, double _maxTES, bool reducedhorizon)
         {
+            this.multithreading = _multithread;
+
             // ===================================================================
             // Pre-processing. Loading profiles etc.
             // ===================================================================
             //load profiles
-            this.ReadInput(_elec,_cool,_sh,_dhw,_feedin,_grid,_carbon,_temp,_pvarea,_solpot,
+            this.ReadInput(_elec, _cool, _sh, _dhw, _feedin, _grid, _carbon, _temp, _pvarea, _solpot,
                 out this.d_elec, out this.d_sh, out this.d_dhw,
                 out this.d_cool, out this.c_grid, out this.c_feedin, out this.a_carbon,
                 out this.a_solar, out this.b_solar_area, out this.c_pv_eff,
@@ -378,18 +384,34 @@ namespace UrbanFormEHub
                 out this.c_hp_eff_sh, out this.c_hp_eff_dhw, out this.c_ac_eff,
                 out this.b_peakcool, out this.b_peaksh, out this.b_peakdhw, out this.b_peakelec);
 
-            
+
             this.maxBatcap = _maxbat;
             this.maxTEScap = _maxTES;
 
 
-            //reduce horizon to 6 weeks
-            this.ReduceHorizon_6weeks(ref this.d_elec, ref this.d_sh, ref this.d_dhw,
-                ref this.d_cool, ref this.c_grid, ref this.c_feedin, ref this.a_carbon, ref this.a_solar,
-                ref this.c_pv_eff, ref this.c_st_eff_sh, ref this.c_st_eff_dhw,
-                ref this.c_hp_eff_sh, ref this.c_hp_eff_dhw, ref this.c_ac_eff,
-                out this.c_num_of_days);
-
+            if (reducedhorizon)
+            {
+                //reduce horizon to 6 weeks
+                this.ReduceHorizon_6weeks(ref this.d_elec, ref this.d_sh, ref this.d_dhw,
+                    ref this.d_cool, ref this.c_grid, ref this.c_feedin, ref this.a_carbon, ref this.a_solar,
+                    ref this.c_pv_eff, ref this.c_st_eff_sh, ref this.c_st_eff_dhw,
+                    ref this.c_hp_eff_sh, ref this.c_hp_eff_dhw, ref this.c_ac_eff,
+                    out this.c_num_of_days_DHW, out this.c_num_of_days_SH, out this.c_num_of_days_Elec, out this.c_num_of_days_Cool);
+            }
+            else
+            {
+                this.c_num_of_days_DHW = new double[this.d_elec.Length];
+                this.c_num_of_days_SH = new double[this.d_elec.Length];
+                this.c_num_of_days_Cool = new double[this.d_elec.Length];
+                this.c_num_of_days_Elec = new double[this.d_elec.Length];
+                for (int t = 0; t < this.d_elec.Length; t++)
+                {
+                    this.c_num_of_days_DHW[t] = 1;
+                    this.c_num_of_days_SH[t] = 1;
+                    this.c_num_of_days_Cool[t] = 1;
+                    this.c_num_of_days_Elec[t] = 1;
+                }
+            }
 
             // horizon
             this.horizon = d_elec.Length;
@@ -855,6 +877,8 @@ namespace UrbanFormEHub
 
 
 
+
+
             //min sizing indicator
             cpl.AddGe(x_boi_s, cpl.Prod(5, y_boi_s));
             cpl.AddGe(x_boi_m, cpl.Prod(50, y_boi_m));
@@ -911,23 +935,23 @@ namespace UrbanFormEHub
             for (int t = 0; t < this.horizon; t++)
             {
                 // co2 emissions by purchase from grid and heat pump
-                a_co2.AddTerm((this.a_carbon[t] / 1000) * this.c_num_of_days[t], x_purchase[t]);
-                a_co2.AddTerm((this.a_carbon[t] / 1000) * this.c_num_of_days[t] * (1 / c_hp_eff_dhw[t]), x_hp_s_op_dhw[t]);
-                a_co2.AddTerm((this.a_carbon[t] / 1000) * this.c_num_of_days[t] * (1 / c_hp_eff_dhw[t]), x_hp_m_op_dhw[t]);
-                a_co2.AddTerm((this.a_carbon[t] / 1000) * this.c_num_of_days[t] * (1 / c_hp_eff_dhw[t]), x_hp_l_op_dhw[t]);
-                a_co2.AddTerm((this.a_carbon[t] / 1000) * this.c_num_of_days[t] * (1 / c_hp_eff_sh[t]), x_hp_s_op_sh[t]);
-                a_co2.AddTerm((this.a_carbon[t] / 1000) * this.c_num_of_days[t] * (1 / c_hp_eff_sh[t]), x_hp_m_op_sh[t]);
-                a_co2.AddTerm((this.a_carbon[t] / 1000) * this.c_num_of_days[t] * (1 / c_hp_eff_sh[t]), x_hp_l_op_sh[t]);
+                a_co2.AddTerm((this.a_carbon[t] / 1000) * this.c_num_of_days_Elec[t], x_purchase[t]);
+                a_co2.AddTerm((this.a_carbon[t] / 1000) * this.c_num_of_days_DHW[t] * (1 / c_hp_eff_dhw[t]), x_hp_s_op_dhw[t]);
+                a_co2.AddTerm((this.a_carbon[t] / 1000) * this.c_num_of_days_DHW[t] * (1 / c_hp_eff_dhw[t]), x_hp_m_op_dhw[t]);
+                a_co2.AddTerm((this.a_carbon[t] / 1000) * this.c_num_of_days_DHW[t] * (1 / c_hp_eff_dhw[t]), x_hp_l_op_dhw[t]);
+                a_co2.AddTerm((this.a_carbon[t] / 1000) * this.c_num_of_days_SH[t] * (1 / c_hp_eff_sh[t]), x_hp_s_op_sh[t]);
+                a_co2.AddTerm((this.a_carbon[t] / 1000) * this.c_num_of_days_SH[t] * (1 / c_hp_eff_sh[t]), x_hp_m_op_sh[t]);
+                a_co2.AddTerm((this.a_carbon[t] / 1000) * this.c_num_of_days_SH[t] * (1 / c_hp_eff_sh[t]), x_hp_l_op_sh[t]);
                 // co2 by natural gas
-                a_co2.AddTerm(lca_gas * this.c_num_of_days[t] * (1 / c_boi_eff_s), x_boi_s_op_dhw[t]);
-                a_co2.AddTerm(lca_gas * this.c_num_of_days[t] * (1 / c_boi_eff_m), x_boi_m_op_dhw[t]);
-                a_co2.AddTerm(lca_gas * this.c_num_of_days[t] * (1 / c_boi_eff_l), x_boi_l_op_dhw[t]);
-                a_co2.AddTerm(lca_gas * this.c_num_of_days[t] * (1 / c_boi_eff_s), x_boi_s_op_sh[t]);
-                a_co2.AddTerm(lca_gas * this.c_num_of_days[t] * (1 / c_boi_eff_m), x_boi_m_op_sh[t]);
-                a_co2.AddTerm(lca_gas * this.c_num_of_days[t] * (1 / c_boi_eff_l), x_boi_l_op_sh[t]);
-                a_co2.AddTerm(lca_gas * this.c_num_of_days[t] * (1 / c_chp_s_eff), x_chp_s_op_e[t]);
-                a_co2.AddTerm(lca_gas * this.c_num_of_days[t] * (1 / c_chp_m_eff), x_chp_m_op_e[t]);
-                a_co2.AddTerm(lca_gas * this.c_num_of_days[t] * (1 / c_chp_l_eff), x_chp_l_op_e[t]);
+                a_co2.AddTerm(lca_gas * this.c_num_of_days_DHW[t] * (1 / c_boi_eff_s), x_boi_s_op_dhw[t]);
+                a_co2.AddTerm(lca_gas * this.c_num_of_days_DHW[t] * (1 / c_boi_eff_m), x_boi_m_op_dhw[t]);
+                a_co2.AddTerm(lca_gas * this.c_num_of_days_DHW[t] * (1 / c_boi_eff_l), x_boi_l_op_dhw[t]);
+                a_co2.AddTerm(lca_gas * this.c_num_of_days_SH[t] * (1 / c_boi_eff_s), x_boi_s_op_sh[t]);
+                a_co2.AddTerm(lca_gas * this.c_num_of_days_SH[t] * (1 / c_boi_eff_m), x_boi_m_op_sh[t]);
+                a_co2.AddTerm(lca_gas * this.c_num_of_days_SH[t] * (1 / c_boi_eff_l), x_boi_l_op_sh[t]);
+                a_co2.AddTerm(lca_gas * this.c_num_of_days_Elec[t] * (1 / c_chp_s_eff), x_chp_s_op_e[t]);
+                a_co2.AddTerm(lca_gas * this.c_num_of_days_Elec[t] * (1 / c_chp_m_eff), x_chp_m_op_e[t]);
+                a_co2.AddTerm(lca_gas * this.c_num_of_days_Elec[t] * (1 / c_chp_l_eff), x_chp_l_op_e[t]);
             }
 
 
@@ -989,55 +1013,55 @@ namespace UrbanFormEHub
 
             for (int t = 0; t < this.horizon; t++)
             {
-                OPEX.AddTerm(this.c_grid[t] * this.c_num_of_days[t], x_purchase[t]);
-                OPEX.AddTerm(-1.0 * this.c_feedin[t] * this.c_num_of_days[t], x_feedin[t]);
+                OPEX.AddTerm(this.c_grid[t] * this.c_num_of_days_Elec[t], x_purchase[t]);
+                OPEX.AddTerm(-1.0 * this.c_feedin[t] * this.c_num_of_days_Elec[t], x_feedin[t]);
 
                 for (int i = 0; i < solarspots; i++)
                 {
-                    OPEX.AddTerm((c_pv_om * this.a_solar[i][t] * 0.001 * this.c_pv_eff[i][t] * this.c_num_of_days[t]), x_pv[i]);
-                    OPEX.AddTerm((c_st_om * this.c_num_of_days[t]), x_st_op_dhw[i][t]);
-                    OPEX.AddTerm((c_st_om * this.c_num_of_days[t]), x_st_op_sh[i][t]);
+                    OPEX.AddTerm((c_pv_om * this.a_solar[i][t] * 0.001 * this.c_pv_eff[i][t] * this.c_num_of_days_Elec[t]), x_pv[i]);
+                    OPEX.AddTerm((c_st_om * this.c_num_of_days_DHW[t]), x_st_op_dhw[i][t]);
+                    OPEX.AddTerm((c_st_om * this.c_num_of_days_SH[t]), x_st_op_sh[i][t]);
                 }
 
-                OPEX.AddTerm((c_gas / c_chp_s_eff) * this.c_num_of_days[t], x_chp_s_op_e[t]);
-                OPEX.AddTerm((c_gas / c_chp_m_eff) * this.c_num_of_days[t], x_chp_m_op_e[t]);
-                OPEX.AddTerm((c_gas / c_chp_l_eff) * this.c_num_of_days[t], x_chp_l_op_e[t]);
-                OPEX.AddTerm(c_chp_om * this.c_num_of_days[t], x_chp_s_op_e[t]);
-                OPEX.AddTerm(c_chp_om * this.c_num_of_days[t], x_chp_m_op_e[t]);
-                OPEX.AddTerm(c_chp_om * this.c_num_of_days[t], x_chp_l_op_e[t]);
+                OPEX.AddTerm((c_gas / c_chp_s_eff) * this.c_num_of_days_Elec[t], x_chp_s_op_e[t]);
+                OPEX.AddTerm((c_gas / c_chp_m_eff) * this.c_num_of_days_Elec[t], x_chp_m_op_e[t]);
+                OPEX.AddTerm((c_gas / c_chp_l_eff) * this.c_num_of_days_Elec[t], x_chp_l_op_e[t]);
+                OPEX.AddTerm(c_chp_om * this.c_num_of_days_Elec[t], x_chp_s_op_e[t]);
+                OPEX.AddTerm(c_chp_om * this.c_num_of_days_Elec[t], x_chp_m_op_e[t]);
+                OPEX.AddTerm(c_chp_om * this.c_num_of_days_Elec[t], x_chp_l_op_e[t]);
 
-                OPEX.AddTerm((c_gas / c_boi_eff_s) * this.c_num_of_days[t], x_boi_s_op_dhw[t]);
-                OPEX.AddTerm((c_gas / c_boi_eff_m) * this.c_num_of_days[t], x_boi_m_op_dhw[t]);
-                OPEX.AddTerm((c_gas / c_boi_eff_l) * this.c_num_of_days[t], x_boi_l_op_dhw[t]);
-                OPEX.AddTerm((c_gas / c_boi_eff_s) * this.c_num_of_days[t], x_boi_s_op_sh[t]);
-                OPEX.AddTerm((c_gas / c_boi_eff_m) * this.c_num_of_days[t], x_boi_m_op_sh[t]);
-                OPEX.AddTerm((c_gas / c_boi_eff_l) * this.c_num_of_days[t], x_boi_l_op_sh[t]);
+                OPEX.AddTerm((c_gas / c_boi_eff_s) * this.c_num_of_days_DHW[t], x_boi_s_op_dhw[t]);
+                OPEX.AddTerm((c_gas / c_boi_eff_m) * this.c_num_of_days_DHW[t], x_boi_m_op_dhw[t]);
+                OPEX.AddTerm((c_gas / c_boi_eff_l) * this.c_num_of_days_DHW[t], x_boi_l_op_dhw[t]);
+                OPEX.AddTerm((c_gas / c_boi_eff_s) * this.c_num_of_days_SH[t], x_boi_s_op_sh[t]);
+                OPEX.AddTerm((c_gas / c_boi_eff_m) * this.c_num_of_days_SH[t], x_boi_m_op_sh[t]);
+                OPEX.AddTerm((c_gas / c_boi_eff_l) * this.c_num_of_days_SH[t], x_boi_l_op_sh[t]);
 
-                OPEX.AddTerm(c_hp_om * this.c_num_of_days[t], x_hp_s_op_dhw[t]);
-                OPEX.AddTerm(c_hp_om * this.c_num_of_days[t], x_hp_m_op_dhw[t]);
-                OPEX.AddTerm(c_hp_om * this.c_num_of_days[t], x_hp_l_op_dhw[t]);
-                OPEX.AddTerm(c_boi_om * this.c_num_of_days[t], x_boi_s_op_dhw[t]);
-                OPEX.AddTerm(c_boi_om * this.c_num_of_days[t], x_boi_m_op_dhw[t]);
-                OPEX.AddTerm(c_boi_om * this.c_num_of_days[t], x_boi_l_op_dhw[t]);
-                OPEX.AddTerm(c_tes_om * this.c_num_of_days[t], x_tes_ch_dhw[t]);
-                OPEX.AddTerm(c_tes_om * this.c_num_of_days[t], x_tes_dis_dhw[t]);
+                OPEX.AddTerm(c_hp_om * this.c_num_of_days_DHW[t], x_hp_s_op_dhw[t]);
+                OPEX.AddTerm(c_hp_om * this.c_num_of_days_DHW[t], x_hp_m_op_dhw[t]);
+                OPEX.AddTerm(c_hp_om * this.c_num_of_days_DHW[t], x_hp_l_op_dhw[t]);
+                OPEX.AddTerm(c_boi_om * this.c_num_of_days_DHW[t], x_boi_s_op_dhw[t]);
+                OPEX.AddTerm(c_boi_om * this.c_num_of_days_DHW[t], x_boi_m_op_dhw[t]);
+                OPEX.AddTerm(c_boi_om * this.c_num_of_days_DHW[t], x_boi_l_op_dhw[t]);
+                OPEX.AddTerm(c_tes_om * this.c_num_of_days_DHW[t], x_tes_ch_dhw[t]);
+                OPEX.AddTerm(c_tes_om * this.c_num_of_days_DHW[t], x_tes_dis_dhw[t]);
 
-                OPEX.AddTerm(c_hp_om * this.c_num_of_days[t], x_hp_s_op_sh[t]);
-                OPEX.AddTerm(c_hp_om * this.c_num_of_days[t], x_hp_m_op_sh[t]);
-                OPEX.AddTerm(c_hp_om * this.c_num_of_days[t], x_hp_l_op_sh[t]);
-                OPEX.AddTerm(c_boi_om * this.c_num_of_days[t], x_boi_s_op_sh[t]);
-                OPEX.AddTerm(c_boi_om * this.c_num_of_days[t], x_boi_m_op_sh[t]);
-                OPEX.AddTerm(c_boi_om * this.c_num_of_days[t], x_boi_l_op_sh[t]);
-                OPEX.AddTerm(c_tes_om * this.c_num_of_days[t], x_tes_ch_sh[t]);
-                OPEX.AddTerm(c_tes_om * this.c_num_of_days[t], x_tes_dis_sh[t]);
+                OPEX.AddTerm(c_hp_om * this.c_num_of_days_SH[t], x_hp_s_op_sh[t]);
+                OPEX.AddTerm(c_hp_om * this.c_num_of_days_SH[t], x_hp_m_op_sh[t]);
+                OPEX.AddTerm(c_hp_om * this.c_num_of_days_SH[t], x_hp_l_op_sh[t]);
+                OPEX.AddTerm(c_boi_om * this.c_num_of_days_SH[t], x_boi_s_op_sh[t]);
+                OPEX.AddTerm(c_boi_om * this.c_num_of_days_SH[t], x_boi_m_op_sh[t]);
+                OPEX.AddTerm(c_boi_om * this.c_num_of_days_SH[t], x_boi_l_op_sh[t]);
+                OPEX.AddTerm(c_tes_om * this.c_num_of_days_SH[t], x_tes_ch_sh[t]);
+                OPEX.AddTerm(c_tes_om * this.c_num_of_days_SH[t], x_tes_dis_sh[t]);
 
-                OPEX.AddTerm(c_bat_om * this.c_num_of_days[t], x_bat_ch[t]);
-                OPEX.AddTerm(c_bat_om * this.c_num_of_days[t], x_bat_dis[t]);
+                OPEX.AddTerm(c_bat_om * this.c_num_of_days_Elec[t], x_bat_ch[t]);
+                OPEX.AddTerm(c_bat_om * this.c_num_of_days_Elec[t], x_bat_dis[t]);
             }
             // cost minimization
             if (!bln_mincarbon) cpl.AddMinimize(cpl.Sum(OPEX, cpl.Sum(CAPEX, c_ac * x_AC + y_ac * fc_ac)));
             // co2 minimization
-            if (bln_mincarbon) cpl.AddMinimize(cpl.Prod(a_co2, 1 / gfa));
+            if (bln_mincarbon) cpl.AddMinimize(cpl.Prod(cpl.Sum(lca_ac * x_AC, a_co2), 1 / gfa));
             //_________________________________________________________________________
             ///////////////////////////////////////////////////////////////////////////
 
@@ -1053,6 +1077,10 @@ namespace UrbanFormEHub
             cpl.SetParam(Cplex.Param.TimeLimit, 300);
             //cpl.SetParam(Cplex.Param.MIP.Tolerances.MIPGap, 0.05);
             //cpl.SetOut(null);
+
+            if(!this.multithreading)
+                cpl.SetParam(Cplex.Param.Threads, 1);
+
             cpl.Solve();
 
             //Console.WriteLine("mip gap: {0}", cpl.GetMIPRelativeGap());
@@ -1083,164 +1111,173 @@ namespace UrbanFormEHub
             //Console.WriteLine("tot pur: {0}, tot sold: {1}", cpl.GetValue(cpl.Sum(x_purchase)), cpl.GetValue(cpl.Sum(x_feedin)));
             //Console.ReadKey();
 
-            if (bln_mincarbon)
+            try
             {
-                outs.cost = cpl.GetValue(cpl.Sum(OPEX, CAPEX));
-                outs.carbon = cpl.ObjValue;
-            }
-            else
-            {
-                outs.cost = cpl.ObjValue;
-                outs.carbon = cpl.GetValue(cpl.Prod(a_co2, 1 / gfa));
-            }
-
-            outs.x_elecpur = new double[this.horizon];
-            outs.x_feedin = new double[this.horizon];
-            outs.b_pvprod = new double[this.horizon];
-
-            outs.x_batcharge = new double[this.horizon];
-            outs.x_batdischarge = new double[this.horizon];
-            outs.x_batsoc = new double[this.horizon];
-            outs.x_tessoc = new double[this.horizon];
-            outs.x_tescharge_dhw = new double[this.horizon];
-            outs.x_tesdischarge_dhw = new double[this.horizon];
-            outs.x_tescharge_sh = new double[this.horizon];
-            outs.x_tesdischarge_sh = new double[this.horizon];
-
-            outs.x_st_optot_dhw = new double[this.horizon];
-            outs.x_st_optot_sh = new double[this.horizon];
-            outs.x_st_op_dhw = new double[solarspots][];
-            outs.x_st_op_sh = new double[solarspots][];
-            outs.x_st_dump_sh = new double[this.horizon];
-            outs.x_st_dump_dhw = new double[this.horizon];
-            for (int i = 0; i < solarspots; i++)
-            {
-                outs.x_st_op_dhw[i] = new double[this.horizon];
-                outs.x_st_op_sh[i] = new double[this.horizon];
-            }
-
-            outs.x_hp_s_op_dhw = new double[this.horizon];
-            outs.x_boi_s_op_dhw = new double[this.horizon];
-            outs.x_chp_s_op_dhw = new double[this.horizon];
-            outs.x_chp_s_dump_dhw = new double[this.horizon];
-            outs.x_hp_m_op_dhw = new double[this.horizon];
-            outs.x_boi_m_op_dhw = new double[this.horizon];
-            outs.x_chp_m_op_dhw = new double[this.horizon];
-            outs.x_chp_m_dump_dhw = new double[this.horizon];
-            outs.x_hp_l_op_dhw = new double[this.horizon];
-            outs.x_boi_l_op_dhw = new double[this.horizon];
-            outs.x_chp_l_op_dhw = new double[this.horizon];
-            outs.x_chp_l_dump_dhw = new double[this.horizon];
-
-            outs.x_hp_s_op_sh = new double[this.horizon];
-            outs.x_boi_s_op_sh = new double[this.horizon];
-            outs.x_chp_s_op_sh = new double[this.horizon];
-            outs.x_chp_s_dump_sh = new double[this.horizon];
-            outs.x_hp_m_op_sh = new double[this.horizon];
-            outs.x_boi_m_op_sh = new double[this.horizon];
-            outs.x_chp_m_op_sh = new double[this.horizon];
-            outs.x_chp_m_dump_sh = new double[this.horizon];
-            outs.x_hp_l_op_sh = new double[this.horizon];
-            outs.x_boi_l_op_sh = new double[this.horizon];
-            outs.x_chp_l_op_sh = new double[this.horizon];
-            outs.x_chp_l_dump_sh = new double[this.horizon];
-
-            outs.x_chp_s_op_e = new double[this.horizon];
-            outs.x_chp_m_op_e = new double[this.horizon];
-            outs.x_chp_l_op_e = new double[this.horizon];
+                if (bln_mincarbon)
+                {
+                    outs.cost = cpl.GetValue(cpl.Sum(OPEX, CAPEX));
+                    outs.carbon = cpl.ObjValue;
+                }
+                else
+                {
+                    outs.cost = cpl.ObjValue;
+                    outs.carbon = cpl.GetValue(cpl.Prod(cpl.Sum(lca_ac * x_AC, a_co2), 1 / gfa));
+                }
 
 
-            outs.x_pv = new double[this.b_solar_area.Length];
-            outs.x_st = new double[this.b_solar_area.Length];
-            for (int t = 0; t < this.horizon; t++)
-            {
-                outs.x_elecpur[t] = cpl.GetValue(x_purchase[t]);
-                outs.x_feedin[t] = cpl.GetValue(x_feedin[t]);
-                outs.x_batcharge[t] = cpl.GetValue(x_bat_ch[t]);
-                outs.x_batdischarge[t] = cpl.GetValue(x_bat_dis[t]);
-                outs.x_batsoc[t] = cpl.GetValue(x_bat_soc[t]);
-                outs.x_tessoc[t] = cpl.GetValue(x_tes_soc[t]);
-                outs.x_tescharge_dhw[t] = cpl.GetValue(x_tes_ch_dhw[t]);
-                outs.x_tesdischarge_dhw[t] = cpl.GetValue(x_tes_dis_dhw[t]);
-                outs.x_tescharge_sh[t] = cpl.GetValue(x_tes_ch_sh[t]);
-                outs.x_tesdischarge_sh[t] = cpl.GetValue(x_tes_dis_sh[t]);
-                outs.x_hp_s_op_dhw[t] = cpl.GetValue(x_hp_s_op_dhw[t]);
-                outs.x_boi_s_op_dhw[t] = cpl.GetValue(x_boi_s_op_dhw[t]);
-                outs.x_chp_s_op_dhw[t] = cpl.GetValue(x_chp_s_op_dhw[t]);
-                outs.x_chp_s_dump_dhw[t] = cpl.GetValue(x_chp_s_dump_dhw[t]);
-                outs.x_hp_m_op_dhw[t] = cpl.GetValue(x_hp_m_op_dhw[t]);
-                outs.x_boi_m_op_dhw[t] = cpl.GetValue(x_boi_m_op_dhw[t]);
-                outs.x_chp_m_op_dhw[t] = cpl.GetValue(x_chp_m_op_dhw[t]);
-                outs.x_chp_m_dump_dhw[t] = cpl.GetValue(x_chp_m_dump_dhw[t]);
-                outs.x_hp_l_op_dhw[t] = cpl.GetValue(x_hp_l_op_dhw[t]);
-                outs.x_boi_l_op_dhw[t] = cpl.GetValue(x_boi_l_op_dhw[t]);
-                outs.x_chp_l_op_dhw[t] = cpl.GetValue(x_chp_l_op_dhw[t]);
-                outs.x_chp_l_dump_dhw[t] = cpl.GetValue(x_chp_l_dump_dhw[t]);
-                outs.x_hp_s_op_sh[t] = cpl.GetValue(x_hp_s_op_sh[t]);
-                outs.x_boi_s_op_sh[t] = cpl.GetValue(x_boi_s_op_sh[t]);
-                outs.x_chp_s_op_sh[t] = cpl.GetValue(x_chp_s_op_sh[t]);
-                outs.x_chp_s_dump_sh[t] = cpl.GetValue(x_chp_s_dump_sh[t]);
-                outs.x_hp_m_op_sh[t] = cpl.GetValue(x_hp_m_op_sh[t]);
-                outs.x_boi_m_op_sh[t] = cpl.GetValue(x_boi_m_op_sh[t]);
-                outs.x_chp_m_op_sh[t] = cpl.GetValue(x_chp_m_op_sh[t]);
-                outs.x_chp_m_dump_sh[t] = cpl.GetValue(x_chp_m_dump_sh[t]);
-                outs.x_hp_l_op_sh[t] = cpl.GetValue(x_hp_l_op_sh[t]);
-                outs.x_boi_l_op_sh[t] = cpl.GetValue(x_boi_l_op_sh[t]);
-                outs.x_chp_l_op_sh[t] = cpl.GetValue(x_chp_l_op_sh[t]);
-                outs.x_chp_l_dump_sh[t] = cpl.GetValue(x_chp_l_dump_sh[t]);
-                outs.x_chp_s_op_e[t] = cpl.GetValue(x_chp_s_op_e[t]);
-                outs.x_chp_m_op_e[t] = cpl.GetValue(x_chp_m_op_e[t]);
-                outs.x_chp_l_op_e[t] = cpl.GetValue(x_chp_l_op_e[t]);
+
+                outs.x_elecpur = new double[this.horizon];
+                outs.x_feedin = new double[this.horizon];
+                outs.b_pvprod = new double[this.horizon];
+
+                outs.x_batcharge = new double[this.horizon];
+                outs.x_batdischarge = new double[this.horizon];
+                outs.x_batsoc = new double[this.horizon];
+                outs.x_tessoc = new double[this.horizon];
+                outs.x_tescharge_dhw = new double[this.horizon];
+                outs.x_tesdischarge_dhw = new double[this.horizon];
+                outs.x_tescharge_sh = new double[this.horizon];
+                outs.x_tesdischarge_sh = new double[this.horizon];
+
+                outs.x_st_optot_dhw = new double[this.horizon];
+                outs.x_st_optot_sh = new double[this.horizon];
+                outs.x_st_op_dhw = new double[solarspots][];
+                outs.x_st_op_sh = new double[solarspots][];
+                outs.x_st_dump_sh = new double[this.horizon];
+                outs.x_st_dump_dhw = new double[this.horizon];
+                for (int i = 0; i < solarspots; i++)
+                {
+                    outs.x_st_op_dhw[i] = new double[this.horizon];
+                    outs.x_st_op_sh[i] = new double[this.horizon];
+                }
+
+                outs.x_hp_s_op_dhw = new double[this.horizon];
+                outs.x_boi_s_op_dhw = new double[this.horizon];
+                outs.x_chp_s_op_dhw = new double[this.horizon];
+                outs.x_chp_s_dump_dhw = new double[this.horizon];
+                outs.x_hp_m_op_dhw = new double[this.horizon];
+                outs.x_boi_m_op_dhw = new double[this.horizon];
+                outs.x_chp_m_op_dhw = new double[this.horizon];
+                outs.x_chp_m_dump_dhw = new double[this.horizon];
+                outs.x_hp_l_op_dhw = new double[this.horizon];
+                outs.x_boi_l_op_dhw = new double[this.horizon];
+                outs.x_chp_l_op_dhw = new double[this.horizon];
+                outs.x_chp_l_dump_dhw = new double[this.horizon];
+
+                outs.x_hp_s_op_sh = new double[this.horizon];
+                outs.x_boi_s_op_sh = new double[this.horizon];
+                outs.x_chp_s_op_sh = new double[this.horizon];
+                outs.x_chp_s_dump_sh = new double[this.horizon];
+                outs.x_hp_m_op_sh = new double[this.horizon];
+                outs.x_boi_m_op_sh = new double[this.horizon];
+                outs.x_chp_m_op_sh = new double[this.horizon];
+                outs.x_chp_m_dump_sh = new double[this.horizon];
+                outs.x_hp_l_op_sh = new double[this.horizon];
+                outs.x_boi_l_op_sh = new double[this.horizon];
+                outs.x_chp_l_op_sh = new double[this.horizon];
+                outs.x_chp_l_dump_sh = new double[this.horizon];
+
+                outs.x_chp_s_op_e = new double[this.horizon];
+                outs.x_chp_m_op_e = new double[this.horizon];
+                outs.x_chp_l_op_e = new double[this.horizon];
 
 
-                outs.x_st_dump_sh[t] = cpl.GetValue(x_st_dump_sh[t]);
-                outs.x_st_dump_dhw[t] = cpl.GetValue(x_st_dump_dhw[t]);
-                outs.b_pvprod[t] = 0;
-                outs.x_st_optot_dhw[t] = 0;
-                outs.x_st_optot_sh[t] = 0;
+                outs.x_pv = new double[this.b_solar_area.Length];
+                outs.x_st = new double[this.b_solar_area.Length];
+                for (int t = 0; t < this.horizon; t++)
+                {
+                    outs.x_elecpur[t] = cpl.GetValue(x_purchase[t]);
+                    outs.x_feedin[t] = cpl.GetValue(x_feedin[t]);
+                    outs.x_batcharge[t] = cpl.GetValue(x_bat_ch[t]);
+                    outs.x_batdischarge[t] = cpl.GetValue(x_bat_dis[t]);
+                    outs.x_batsoc[t] = cpl.GetValue(x_bat_soc[t]);
+                    outs.x_tessoc[t] = cpl.GetValue(x_tes_soc[t]);
+                    outs.x_tescharge_dhw[t] = cpl.GetValue(x_tes_ch_dhw[t]);
+                    outs.x_tesdischarge_dhw[t] = cpl.GetValue(x_tes_dis_dhw[t]);
+                    outs.x_tescharge_sh[t] = cpl.GetValue(x_tes_ch_sh[t]);
+                    outs.x_tesdischarge_sh[t] = cpl.GetValue(x_tes_dis_sh[t]);
+                    outs.x_hp_s_op_dhw[t] = cpl.GetValue(x_hp_s_op_dhw[t]);
+                    outs.x_boi_s_op_dhw[t] = cpl.GetValue(x_boi_s_op_dhw[t]);
+                    outs.x_chp_s_op_dhw[t] = cpl.GetValue(x_chp_s_op_dhw[t]);
+                    outs.x_chp_s_dump_dhw[t] = cpl.GetValue(x_chp_s_dump_dhw[t]);
+                    outs.x_hp_m_op_dhw[t] = cpl.GetValue(x_hp_m_op_dhw[t]);
+                    outs.x_boi_m_op_dhw[t] = cpl.GetValue(x_boi_m_op_dhw[t]);
+                    outs.x_chp_m_op_dhw[t] = cpl.GetValue(x_chp_m_op_dhw[t]);
+                    outs.x_chp_m_dump_dhw[t] = cpl.GetValue(x_chp_m_dump_dhw[t]);
+                    outs.x_hp_l_op_dhw[t] = cpl.GetValue(x_hp_l_op_dhw[t]);
+                    outs.x_boi_l_op_dhw[t] = cpl.GetValue(x_boi_l_op_dhw[t]);
+                    outs.x_chp_l_op_dhw[t] = cpl.GetValue(x_chp_l_op_dhw[t]);
+                    outs.x_chp_l_dump_dhw[t] = cpl.GetValue(x_chp_l_dump_dhw[t]);
+                    outs.x_hp_s_op_sh[t] = cpl.GetValue(x_hp_s_op_sh[t]);
+                    outs.x_boi_s_op_sh[t] = cpl.GetValue(x_boi_s_op_sh[t]);
+                    outs.x_chp_s_op_sh[t] = cpl.GetValue(x_chp_s_op_sh[t]);
+                    outs.x_chp_s_dump_sh[t] = cpl.GetValue(x_chp_s_dump_sh[t]);
+                    outs.x_hp_m_op_sh[t] = cpl.GetValue(x_hp_m_op_sh[t]);
+                    outs.x_boi_m_op_sh[t] = cpl.GetValue(x_boi_m_op_sh[t]);
+                    outs.x_chp_m_op_sh[t] = cpl.GetValue(x_chp_m_op_sh[t]);
+                    outs.x_chp_m_dump_sh[t] = cpl.GetValue(x_chp_m_dump_sh[t]);
+                    outs.x_hp_l_op_sh[t] = cpl.GetValue(x_hp_l_op_sh[t]);
+                    outs.x_boi_l_op_sh[t] = cpl.GetValue(x_boi_l_op_sh[t]);
+                    outs.x_chp_l_op_sh[t] = cpl.GetValue(x_chp_l_op_sh[t]);
+                    outs.x_chp_l_dump_sh[t] = cpl.GetValue(x_chp_l_dump_sh[t]);
+                    outs.x_chp_s_op_e[t] = cpl.GetValue(x_chp_s_op_e[t]);
+                    outs.x_chp_m_op_e[t] = cpl.GetValue(x_chp_m_op_e[t]);
+                    outs.x_chp_l_op_e[t] = cpl.GetValue(x_chp_l_op_e[t]);
+
+
+                    outs.x_st_dump_sh[t] = cpl.GetValue(x_st_dump_sh[t]);
+                    outs.x_st_dump_dhw[t] = cpl.GetValue(x_st_dump_dhw[t]);
+                    outs.b_pvprod[t] = 0;
+                    outs.x_st_optot_dhw[t] = 0;
+                    outs.x_st_optot_sh[t] = 0;
+                    for (int i = 0; i < this.b_solar_area.Length; i++)
+                    {
+                        double pvprodnow = this.a_solar[i][t] * 0.001 * this.c_pv_eff[i][t] * cpl.GetValue(x_pv[i]);
+                        outs.b_pvprod[t] += pvprodnow;
+                        outs.x_st_optot_dhw[t] += cpl.GetValue(x_st_op_dhw[i][t]);
+                        outs.x_st_optot_sh[t] += cpl.GetValue(x_st_op_sh[i][t]);
+                        if (cpl.GetValue(x_st_op_dhw[i][t]) > 0 || cpl.GetValue(x_st_op_sh[i][t]) > 0)
+                        {
+                            Console.WriteLine("here");
+                            Console.WriteLine(cpl.GetValue(x_st_op_dhw[i][t]));
+                            Console.WriteLine("sh at i={0} and t={1} with kWh={2}", i, t, cpl.GetValue(x_st_op_sh[i][t]));
+                        }
+                        outs.x_st_op_dhw[i][t] = cpl.GetValue(x_st_op_dhw[i][t]);
+                        outs.x_st_op_sh[i][t] = cpl.GetValue(x_st_op_sh[i][t]);
+                    }
+                }
                 for (int i = 0; i < this.b_solar_area.Length; i++)
                 {
-                    double pvprodnow = this.a_solar[i][t] * 0.001 * this.c_pv_eff[i][t] * cpl.GetValue(x_pv[i]);
-                    outs.b_pvprod[t] += pvprodnow;
-                    outs.x_st_optot_dhw[t] += cpl.GetValue(x_st_op_dhw[i][t]);
-                    outs.x_st_optot_sh[t] += cpl.GetValue(x_st_op_sh[i][t]);
-                    if (cpl.GetValue(x_st_op_dhw[i][t]) > 0 || cpl.GetValue(x_st_op_sh[i][t]) > 0)
-                    {
-                        Console.WriteLine("here");
-                        Console.WriteLine(cpl.GetValue(x_st_op_dhw[i][t]));
-                        Console.WriteLine("sh at i={0} and t={1} with kWh={2}", i, t, cpl.GetValue(x_st_op_sh[i][t]));
-                    }
-                    outs.x_st_op_dhw[i][t] = cpl.GetValue(x_st_op_dhw[i][t]);
-                    outs.x_st_op_sh[i][t] = cpl.GetValue(x_st_op_sh[i][t]);
+                    outs.x_pv[i] = cpl.GetValue(x_pv[i]);
+                    outs.x_st[i] = cpl.GetValue(x_st[i]);
                 }
+
+                outs.x_ac = x_AC;
+                outs.x_tes = cpl.GetValue(x_tes);
+                outs.x_bat = cpl.GetValue(x_bat);
+
+                outs.x_hp_s = cpl.GetValue(x_hp_s);
+                outs.x_boi_s = cpl.GetValue(x_boi_s);
+                outs.x_chp_s = cpl.GetValue(x_chp_s);
+                outs.x_hp_m = cpl.GetValue(x_hp_m);
+                outs.x_boi_m = cpl.GetValue(x_boi_m);
+                outs.x_chp_m = cpl.GetValue(x_chp_m);
+                outs.x_hp_l = cpl.GetValue(x_hp_l);
+                outs.x_boi_l = cpl.GetValue(x_boi_l);
+                outs.x_chp_l = cpl.GetValue(x_chp_l);
+
+
+                outs.OPEX = cpl.GetValue(OPEX);
+                outs.CAPEX = cpl.GetValue(CAPEX);
+                //_________________________________________________________________________
+                ///////////////////////////////////////////////////////////////////////////
+
+                outs.infeasible = false;
             }
-            for (int i = 0; i < this.b_solar_area.Length; i++)
+            catch
             {
-                outs.x_pv[i] = cpl.GetValue(x_pv[i]);
-                outs.x_st[i] = cpl.GetValue(x_st[i]);
+                outs.infeasible = true;
             }
-
-            outs.x_ac = x_AC;
-            outs.x_tes = cpl.GetValue(x_tes);
-            outs.x_bat = cpl.GetValue(x_bat);
-
-            outs.x_hp_s = cpl.GetValue(x_hp_s);
-            outs.x_boi_s = cpl.GetValue(x_boi_s);
-            outs.x_chp_s = cpl.GetValue(x_chp_s);
-            outs.x_hp_m = cpl.GetValue(x_hp_m);
-            outs.x_boi_m = cpl.GetValue(x_boi_m);
-            outs.x_chp_m = cpl.GetValue(x_chp_m);
-            outs.x_hp_l = cpl.GetValue(x_hp_l);
-            outs.x_boi_l = cpl.GetValue(x_boi_l);
-            outs.x_chp_l = cpl.GetValue(x_chp_l);
-
-
-            outs.OPEX = cpl.GetValue(OPEX);
-            outs.CAPEX = cpl.GetValue(CAPEX);
-            //_________________________________________________________________________
-            ///////////////////////////////////////////////////////////////////////////
-
-
 
 
             return outs;
@@ -1269,7 +1306,7 @@ namespace UrbanFormEHub
         /// <param name="HP_COP_sh"></param>
         /// <param name="HP_COP_dhw"></param>
         /// <param name="AC_COP"></param>
-        private void ReadInput(List<double> _elec, List<double> _cool, List<double> _sh, List<double> _dhw, List<double> _feedin, List<double> _grid, 
+        private void ReadInput(List<double> _elec, List<double> _cool, List<double> _sh, List<double> _dhw, List<double> _feedin, List<double> _grid,
             List<double> _carbon, List<double> _temp, List<double> _pvarea, List<List<double>> _solpot,
             out double[] elec_demand,
             out double[] SH_demand, out double[] DHW_demand,
@@ -1345,7 +1382,7 @@ namespace UrbanFormEHub
                 solar[i] = new double[horizon];
                 solar[i] = _solpot[i].ToArray();
             }
-            
+
 
 
 
@@ -1378,6 +1415,9 @@ namespace UrbanFormEHub
 
         }
 
+
+
+
         /// <summary>
         /// Reduces horizon down to 1 week per 2 months. returns arrays of 6 * 7 * 24 hours. weighting of cost etc has to be done in the milp
         /// </summary>
@@ -1391,7 +1431,7 @@ namespace UrbanFormEHub
             ref double[][] ST_efficiency_sh, ref double[][] ST_efficiency_dhw,
             ref double[] HP_COP_sh, ref double[] HP_COP_dhw,
             ref double[] AC_COP,
-            out double[] num_days)
+            out double[] num_days_DHW, out double[] num_days_SH, out double[] num_days_elec, out double[] num_days_cool)
         {
             // t=0-23 is tuesday
             // jan  [313, 480]
@@ -1401,53 +1441,63 @@ namespace UrbanFormEHub
             // sep  [6025, 6192]
             // nov  [7537, 7704]
 
-            double[] test = new double[6];
 
-            int redhor = 6 * 7 * 24;
-            num_days = new double[redhor];
 
-            for (int i = 0; i < 7; i++) //first week in january. counts for h=0 to h=(1657-481)/2 + 481 = 1069 h +half of december (8017 - 8759)/2=371
-            {
-                for (int h = 0; h < 24; h++)
-                {
-                    num_days[i * 24 + h] = 1069 / 24 + 371 / 24;
-                }
-            }
-            for (int i = 7; i < 14; i++) //second week in march. counts for h=1069 to h=(3169-1825)/2 + 1825= 2497 h 
-            {
-                for (int h = 0; h < 24; h++)
-                {
-                    num_days[i * 24 + h] = 2497 / 24 - 1069 / 24;
-                }
-            }
-            for (int i = 14; i < 21; i++) //third week in may. counts for h=2497 to h=(4681-3337)/2 + 3337= 4009 h 
-            {
-                for (int h = 0; h < 24; h++)
-                {
-                    num_days[i * 24 + h] = 4009 / 24 - 2497 / 24;
-                }
-            }
-            for (int i = 21; i < 28; i++) //fourth week in july. counts for h=4009 to h=(6025-4849)/2 + 4849= 5437 h 
-            {
-                for (int h = 0; h < 24; h++)
-                {
-                    num_days[i * 24 + h] = 5437 / 24 - 4009 / 24;
-                }
-            }
-            for (int i = 28; i < 35; i++) //fifth week in sept. counts for h=5437 to h=(7537-6193)/2 + 6193= 6865 h 
-            {
-                for (int h = 0; h < 24; h++)
-                {
-                    num_days[i * 24 + h] = 6865 / 24 - 5437 / 24;
-                }
-            }
-            for (int i = 35; i < 42; i++) //sixth week in november. counts for h=6865 to h=8759 - half of december (8017 - 8759)/2=371
-            {
-                for (int h = 0; h < 24; h++)
-                {
-                    num_days[i * 24 + h] = 8760 / 24 - 6865 / 24 - 371 / 24;
-                }
-            }
+
+            //making sure aggregated annual loads equal those aggregated of the reduced horizon
+            double sumDHW = this.d_dhw.Sum();
+            double sumSH = this.d_sh.Sum();
+            double sumElec = this.d_elec.Sum();
+            double sumCool = this.d_cool.Sum();
+            //doing it by scaling num_days... later 
+
+
+            //six weeks times 7 days times 24 hours
+            int redhor = 6 * 7 * 24; // = 1008 hours
+
+
+            //for (int i = 0; i < 7; i++) //first week in january. counts for h=0 to h=(1657-481)/2 + 481 = 1069 h +half of december (8017 - 8759)/2=371
+            //{
+            //    for (int h = 0; h < 24; h++)
+            //    {
+            //        num_days[i * 24 + h] = 1069 / 24 + 371 / 24;
+            //    }
+            //}
+            //for (int i = 7; i < 14; i++) //second week in march. counts for h=1069 to h=(3169-1825)/2 + 1825= 2497 h 
+            //{
+            //    for (int h = 0; h < 24; h++)
+            //    {
+            //        num_days[i * 24 + h] = 2497 / 24 - 1069 / 24;
+            //    }
+            //}
+            //for (int i = 14; i < 21; i++) //third week in may. counts for h=2497 to h=(4681-3337)/2 + 3337= 4009 h 
+            //{
+            //    for (int h = 0; h < 24; h++)
+            //    {
+            //        num_days[i * 24 + h] = 4009 / 24 - 2497 / 24;
+            //    }
+            //}
+            //for (int i = 21; i < 28; i++) //fourth week in july. counts for h=4009 to h=(6025-4849)/2 + 4849= 5437 h 
+            //{
+            //    for (int h = 0; h < 24; h++)
+            //    {
+            //        num_days[i * 24 + h] = 5437 / 24 - 4009 / 24;
+            //    }
+            //}
+            //for (int i = 28; i < 35; i++) //fifth week in sept. counts for h=5437 to h=(7537-6193)/2 + 6193= 6865 h 
+            //{
+            //    for (int h = 0; h < 24; h++)
+            //    {
+            //        num_days[i * 24 + h] = 6865 / 24 - 5437 / 24;
+            //    }
+            //}
+            //for (int i = 35; i < 42; i++) //sixth week in november. counts for h=6865 to h=8759 - half of december (8017 - 8759)/2=371
+            //{
+            //    for (int h = 0; h < 24; h++)
+            //    {
+            //        num_days[i * 24 + h] = 8760 / 24 - 6865 / 24 - 371 / 24;
+            //    }
+            //}
 
 
             int p = 0;
@@ -1560,6 +1610,32 @@ namespace UrbanFormEHub
                 copy_steffdhw[i].CopyTo(ST_efficiency_dhw[i], 0);
             }
 
+
+
+
+            double sumDHWred = DHW_demand.Sum();
+            double sumSHred = SH_demand.Sum();
+            double sumCoolred = cool_demand.Sum();
+            double sumElecred = elec_demand.Sum();
+
+            num_days_DHW = new double[redhor];
+            num_days_SH = new double[redhor];
+            num_days_cool = new double[redhor];
+            num_days_elec = new double[redhor];
+
+
+            double redhorfac_dhw = sumDHW / sumDHWred;
+            double redhorfac_sh = sumSH / sumSHred;
+            double redhorfac_cool = sumCool / sumCoolred;
+            double redhorfac_elec = sumElec / sumElecred;
+
+            for (int t = 0; t < redhor; t++)
+            {
+                num_days_DHW[t] = redhorfac_dhw;
+                num_days_SH[t] = redhorfac_sh;
+                num_days_cool[t] = redhorfac_cool;
+                num_days_elec[t] = redhorfac_elec;
+            }
         }
 
 

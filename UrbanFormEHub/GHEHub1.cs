@@ -52,11 +52,17 @@ namespace UrbanFormEHub
             // 11
             pManager.AddNumberParameter("pvarea", "pvarea", "Facade patches that may be used for PV or solar thermal, in [m^2].", GH_ParamAccess.list);
             // 12
-            pManager.AddNumberParameter("solar", "solar", "Solar potentials hourly time series for multiple sensor points, in [W/m^2].", GH_ParamAccess.tree);
+            pManager.AddNumberParameter("solar", "solar", "Solar potentials hourly time series for multiple sensor points, in [W/m^2]. Should be patches * 4, beacuse 4 potential profiles per patch. will be averaged in this script.", GH_ParamAccess.tree);
             //13
             pManager.AddNumberParameter("maxbat", "maxbat", "Maximal battery capacity. E.g. 100kWh per storey and building.", GH_ParamAccess.item);
             //14
             pManager.AddNumberParameter("maxtes", "maxtes", "Maximal TES capacity. E.g. 1400 kWh per building.", GH_ParamAccess.item);
+            //15
+            pManager.AddBooleanParameter("redhor", "redhor", "Reduce horizon to 6 weeks?", GH_ParamAccess.item); 
+            //16
+            pManager.AddBooleanParameter("minCarbon", "minCarbon", "Objective: minimize carbon, instead cost? True, if min carbon.", GH_ParamAccess.item);
+            //17
+            pManager.AddBooleanParameter("multithread", "multithread", "Activate multi threading? If yes, maximum available threads are used. If false, it's limited to 1 thread.", GH_ParamAccess.item);
         }
 
         /// <summary>
@@ -66,44 +72,40 @@ namespace UrbanFormEHub
         {
             // 0 - 1
             pManager.AddNumberParameter("cost", "cost", "Objective Value. Discounted annual cost for installation and operation of energy system, in [CHF].", GH_ParamAccess.item);
-            pManager.AddNumberParameter("co2", "co2", "Annual carbon emissions for operation of energy system in [kgCO2].", GH_ParamAccess.item);
+            pManager.AddNumberParameter("co2", "co2", "Specific annual carbon emissions for operation of energy system in [kgCO2/m2].", GH_ParamAccess.item);
 
             // 2 - 4
             pManager.AddNumberParameter("capacities", "capacities", "Sized capacities of energy technologies in kW or kWh (storages). [0] AC; [1] hp_s; [2] hp_m; [3] hp_l; [4] chp_s; [5] chp_m; [6] chp_l; [7] boi_s; [8] boi_m; [9] boi_l; [10] bat; [11] tes", GH_ParamAccess.list);
             pManager.AddNumberParameter("pv m2", "pv m2", "installed pv per patch in m2.", GH_ParamAccess.list);
             pManager.AddNumberParameter("st m2", "st m2", "installed st per patch in m2.", GH_ParamAccess.list);
 
-            // 5 -7
-            pManager.AddNumberParameter("hp_s_op", "hp_s_op", "Heat pump small operation schedule in kW", GH_ParamAccess.list);
-            pManager.AddNumberParameter("hp_m_op", "hp_m_op", "Heat pump medium operation schedule in kW", GH_ParamAccess.list);
-            pManager.AddNumberParameter("hp_l_op", "hp_l_op", "Heat pump large operation schedule in kW", GH_ParamAccess.list);
+            // 5
+            pManager.AddNumberParameter("hp_op", "hp_op", "Heat pump operation schedule in kW", GH_ParamAccess.list);
 
-            // 8 - 10
-            pManager.AddNumberParameter("chp_s_op", "chp_s_op", "Combined Heat and Power small operation schedule in kW", GH_ParamAccess.list);
-            pManager.AddNumberParameter("chp_m_op", "chp_m_op", "Combined Heat and Power medium operation schedule in kW", GH_ParamAccess.list);
-            pManager.AddNumberParameter("chp_l_op", "chp_l_op", "Combined Heat and Power large operation schedule in kW", GH_ParamAccess.list);
+            // 6-7
+            pManager.AddNumberParameter("chp_op_h", "chp_op_h", "Combined Heat and Power operation schedule (heating) in kW", GH_ParamAccess.list);
+            pManager.AddNumberParameter("chp_op_e", "chp_op_e", "Combined Heat and Power operation schedule (electricity) in kW", GH_ParamAccess.list);
 
-            // 11 - 13
-            pManager.AddNumberParameter("boi_s_op", "boi_s_op", "Boiler small operation schedule in kW", GH_ParamAccess.list);
-            pManager.AddNumberParameter("boi_m_op", "boi_m_op", "Boiler medium operation schedule in kW", GH_ParamAccess.list);
-            pManager.AddNumberParameter("boi_l_op", "boi_l_op", "Boiler large operation schedule in kW", GH_ParamAccess.list);
+            // 8
+            pManager.AddNumberParameter("boi_op", "boi_op", "Boiler operation schedule in kW", GH_ParamAccess.list);
 
-            // 14 - 16
+            // 9-11
             pManager.AddNumberParameter("ch_bat", "ch_bat", "Charging schedule of battery in kW.", GH_ParamAccess.list);
             pManager.AddNumberParameter("dis_bat", "dis_bat", "Discharging schedule of battery in kW.", GH_ParamAccess.list);
             pManager.AddNumberParameter("soc_bat", "soc_bat", "State of charge schedule of battery in kWh.", GH_ParamAccess.list);
 
-            // 17 - 19
+            // 12-14
             pManager.AddNumberParameter("ch_tes", "ch_tes", "Charging schedule of Thermal Energy Storage in kW.", GH_ParamAccess.list);
             pManager.AddNumberParameter("dis_tes", "dis_tes", "Discharging schedule of Thermal Energy Storage in kW.", GH_ParamAccess.list);
             pManager.AddNumberParameter("soc_tes", "soc_tes", "State of charge schedule of Thermal Energy Storage in kWh.", GH_ParamAccess.list);
 
-            // 20 - 22
+            // 15-18
             pManager.AddGenericParameter("heat_dump", "heat_dump", "Heat dumped in kWh", GH_ParamAccess.list);
+            pManager.AddGenericParameter("pv_prod", "pv_prod", "PV electricity generation in kWh", GH_ParamAccess.list);
             pManager.AddNumberParameter("ElecPur", "dblEpur", "schedule of electricity purchased", GH_ParamAccess.list);
             pManager.AddNumberParameter("ElecSell", "dblEsell", "schedule of electricity sold", GH_ParamAccess.list);
 
-            // 23 - 26
+            // 19-22
             pManager.AddNumberParameter("red_elec", "red_elec", "Horizon-reduced electricity demand. 1008 hours, 6 weeks.", GH_ParamAccess.list);
             pManager.AddNumberParameter("red_sh", "red_sh", "Horizon-reduced space heating demand. 1008 hours, 6 weeks.", GH_ParamAccess.list);
             pManager.AddNumberParameter("red_dhw", "red_dhw", "Horizon-reduced domestic hot water demand. 1008 hours, 6 weeks.", GH_ParamAccess.list);
@@ -117,11 +119,15 @@ namespace UrbanFormEHub
         /// to store data in output parameters.</param>
         protected override void SolveInstance(IGH_DataAccess DA)
         {
+
+            //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! CAREFUL HARDCODED STUFF LINES 160 following
+
+
             bool start = false;
             if (!DA.GetData(0, ref start)) { };
 
             double carbcon = double.MaxValue;
-            if (!DA.GetData(1, ref carbcon)){};
+            if (!DA.GetData(1, ref carbcon)) { };
 
             double gfa = double.MaxValue;
             if (!DA.GetData(2, ref gfa)) { };
@@ -153,6 +159,14 @@ namespace UrbanFormEHub
             List<double> pvarea = new List<double>();
             if (!DA.GetDataList(11, pvarea)) { return; }
 
+            //assuming 30% of the facade can be covered with PV
+            for(int i=0; i<pvarea.Count; i++)
+            {
+                if(i>-1 && i<9) pvarea[i] *= 0.3;
+                if (i > 44 && i < 54) pvarea[i] *= 0.3;
+                if (i > 89 && i < 99) pvarea[i] *= 0.3;
+                if (i> 134 && i< 114) pvarea[i] *= 0.3;
+            }
 
             Grasshopper.Kernel.Data.GH_Structure<Grasshopper.Kernel.Types.GH_Number> sol;
             if (!DA.GetDataTree(12, out sol)) { return; }
@@ -174,14 +188,116 @@ namespace UrbanFormEHub
             double maxtes = double.MaxValue;
             if (!DA.GetData(14, ref maxtes)) { };
 
+            bool reducedhorizon = false;
+            if (!DA.GetData(15, ref reducedhorizon)) { };
 
+            bool mincarbon = false;
+            if (!DA.GetData(16, ref mincarbon)) { };
+
+            bool multithreading = true;
+            if (!DA.GetData(17, ref multithreading)) { };
 
             if (start)
             {
-                Ehub ehub = new Ehub(false, false, gfa, carbcon, elecdem, cooldem, shdem, dhwdem, feedin, grid, carbon, temp, pvarea, solarPotList, maxbat, maxtes);
+                Ehub ehub = new Ehub(multithreading, mincarbon , false, gfa, carbcon, elecdem, cooldem, shdem, dhwdem, feedin, grid, carbon, temp, pvarea, solarPotList, maxbat, maxtes,reducedhorizon);
 
-                DA.SetData(0, ehub.outputs.cost);
-                DA.SetData(1, ehub.outputs.carbon);
+                if (!ehub.outputs.infeasible)
+                {
+                    DA.SetData(0, ehub.outputs.cost);
+                    DA.SetData(1, ehub.outputs.carbon);
+
+                    List<double> x_cap = new List<double>();
+                    x_cap.Add(ehub.outputs.x_ac);
+                    x_cap.Add(ehub.outputs.x_hp_s);
+                    x_cap.Add(ehub.outputs.x_hp_m);
+                    x_cap.Add(ehub.outputs.x_hp_l);
+                    x_cap.Add(ehub.outputs.x_chp_s);
+                    x_cap.Add(ehub.outputs.x_chp_m);
+                    x_cap.Add(ehub.outputs.x_chp_l);
+                    x_cap.Add(ehub.outputs.x_boi_s);
+                    x_cap.Add(ehub.outputs.x_boi_m);
+                    x_cap.Add(ehub.outputs.x_boi_l);
+                    x_cap.Add(ehub.outputs.x_bat);
+                    x_cap.Add(ehub.outputs.x_tes);
+                    DA.SetDataList(2, x_cap);
+
+                    List<double> x_pv = new List<double>();
+                    List<double> x_st = new List<double>();
+                    for (int p = 0; p < ehub.outputs.x_pv.Length; p++)
+                    {
+                        x_pv.Add(ehub.outputs.x_pv[p]);
+                        x_st.Add(ehub.outputs.x_st[p]);
+                    }
+                    DA.SetDataList(3, x_pv);
+                    DA.SetDataList(4, x_st);
+
+                    List<double> x_hp_op = new List<double>();
+                    List<double> x_chp_op_h = new List<double>();
+                    List<double> x_chp_op_e = new List<double>();
+                    List<double> x_boi_op = new List<double>();
+                    List<double> x_bat_ch_op = new List<double>();
+                    List<double> x_bat_dis_op = new List<double>();
+                    List<double> x_bat_soc_op = new List<double>();
+                    List<double> x_tes_ch_op = new List<double>();
+                    List<double> x_tes_dis_op = new List<double>();
+                    List<double> x_tes_soc_op = new List<double>();
+                    List<double> x_dump_op = new List<double>();
+                    List<double> x_pv_prod = new List<double>();
+                    List<double> x_elec_pur = new List<double>();
+                    List<double> x_elec_sell = new List<double>();
+                    List<double> d_elec_red = new List<double>();
+                    List<double> d_sh_red = new List<double>();
+                    List<double> d_dhw_red = new List<double>();
+                    List<double> d_cool_red = new List<double>();
+
+                    for (int t = 0; t < ehub.horizon; t++)
+                    {
+                        x_hp_op.Add(ehub.outputs.x_hp_s_op_sh[t] + ehub.outputs.x_hp_s_op_dhw[t] + ehub.outputs.x_hp_m_op_sh[t] + ehub.outputs.x_hp_m_op_dhw[t] + ehub.outputs.x_hp_l_op_sh[t] + ehub.outputs.x_hp_l_op_dhw[t]);
+                        x_chp_op_h.Add(ehub.outputs.x_chp_s_op_sh[t] + ehub.outputs.x_chp_s_op_dhw[t] + ehub.outputs.x_chp_m_op_sh[t] + ehub.outputs.x_chp_m_op_dhw[t] + ehub.outputs.x_chp_l_op_sh[t] + ehub.outputs.x_chp_l_op_dhw[t]);
+                        x_chp_op_e.Add(ehub.outputs.x_chp_s_op_e[t] + ehub.outputs.x_chp_m_op_e[t] + ehub.outputs.x_chp_l_op_e[t]);
+                        x_boi_op.Add(ehub.outputs.x_boi_s_op_sh[t] + ehub.outputs.x_boi_s_op_dhw[t] + ehub.outputs.x_boi_m_op_sh[t] + ehub.outputs.x_boi_m_op_dhw[t] + ehub.outputs.x_boi_l_op_sh[t] + ehub.outputs.x_boi_l_op_dhw[t]);
+                        x_bat_ch_op.Add(ehub.outputs.x_batcharge[t]);
+                        x_bat_dis_op.Add(ehub.outputs.x_batdischarge[t]);
+                        x_bat_soc_op.Add(ehub.outputs.x_batsoc[t]);
+                        x_tes_ch_op.Add(ehub.outputs.x_tescharge_sh[t]+ ehub.outputs.x_tescharge_dhw[t]);
+                        x_tes_dis_op.Add(ehub.outputs.x_tesdischarge_sh[t]+ ehub.outputs.x_tesdischarge_dhw[t]);
+                        x_tes_soc_op.Add(ehub.outputs.x_tessoc[t]);
+                        x_dump_op.Add(ehub.outputs.x_chp_s_dump_sh[t]+ehub.outputs.x_chp_m_dump_sh[t]+ehub.outputs.x_chp_l_dump_sh[t]+ehub.outputs.x_chp_s_dump_sh[t]+ehub.outputs.x_chp_m_dump_sh[t]+ehub.outputs.x_chp_l_dump_sh[t]+
+                        ehub.outputs.x_st_dump_dhw[t]+ehub.outputs.x_st_dump_sh[t]);
+                        x_pv_prod.Add(ehub.outputs.b_pvprod[t]);
+                        x_elec_pur.Add(ehub.outputs.x_elecpur[t]);
+                        x_elec_sell.Add(ehub.outputs.x_feedin[t]); 
+                        d_elec_red.Add(ehub.d_elec[t]);
+                        d_sh_red.Add(ehub.d_sh[t]);
+                        d_dhw_red.Add(ehub.d_dhw[t]);
+                        d_cool_red.Add(ehub.d_cool[t]);
+                    }
+
+                    DA.SetDataList(5, x_hp_op);
+                    DA.SetDataList(6, x_chp_op_h);
+                    DA.SetDataList(7, x_chp_op_e);
+                    DA.SetDataList(8, x_boi_op);
+                    DA.SetDataList(9, x_bat_ch_op);
+                    DA.SetDataList(10, x_bat_dis_op);
+                    DA.SetDataList(11, x_bat_soc_op);
+                    DA.SetDataList(12, x_tes_ch_op);
+                    DA.SetDataList(13, x_tes_dis_op);
+                    DA.SetDataList(14, x_tes_soc_op);
+                    DA.SetDataList(15, x_dump_op);
+                    DA.SetDataList(16, x_pv_prod);
+                    DA.SetDataList(17, x_elec_pur);
+                    DA.SetDataList(18, x_elec_sell);
+                    DA.SetDataList(19, d_elec_red);
+                    DA.SetDataList(20, d_sh_red);
+                    DA.SetDataList(21, d_dhw_red);
+                    DA.SetDataList(22, d_cool_red);
+
+                }
+                else
+                {
+                    DA.SetData(0, 10000000);    // penalty value. should never get so high otherwise
+                    DA.SetData(1, 200);         // same
+                }
             }
 
         }
