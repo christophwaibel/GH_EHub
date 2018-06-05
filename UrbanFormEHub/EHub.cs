@@ -495,7 +495,8 @@ namespace UrbanFormEHub
             INumVar[] x_st_dump_dhw = new INumVar[this.horizon];
             for (int i = 0; i < solarspots; i++)
             {
-                x_st[i] = cpl.NumVar(0, this.b_solar_area[i]);
+                //x_st[i] = cpl.NumVar(0, this.b_solar_area[i]);
+                x_st[i] = cpl.NumVar(0, 0);
                 x_st_op_sh[i] = new INumVar[this.horizon];
                 x_st_op_dhw[i] = new INumVar[this.horizon];
             }
@@ -936,12 +937,12 @@ namespace UrbanFormEHub
             {
                 // co2 emissions by purchase from grid and heat pump
                 a_co2.AddTerm((this.a_carbon[t] / 1000) * this.c_num_of_days_Elec[t], x_purchase[t]);
-                a_co2.AddTerm((this.a_carbon[t] / 1000) * this.c_num_of_days_DHW[t] * (1 / c_hp_eff_dhw[t]), x_hp_s_op_dhw[t]);
-                a_co2.AddTerm((this.a_carbon[t] / 1000) * this.c_num_of_days_DHW[t] * (1 / c_hp_eff_dhw[t]), x_hp_m_op_dhw[t]);
-                a_co2.AddTerm((this.a_carbon[t] / 1000) * this.c_num_of_days_DHW[t] * (1 / c_hp_eff_dhw[t]), x_hp_l_op_dhw[t]);
-                a_co2.AddTerm((this.a_carbon[t] / 1000) * this.c_num_of_days_SH[t] * (1 / c_hp_eff_sh[t]), x_hp_s_op_sh[t]);
-                a_co2.AddTerm((this.a_carbon[t] / 1000) * this.c_num_of_days_SH[t] * (1 / c_hp_eff_sh[t]), x_hp_m_op_sh[t]);
-                a_co2.AddTerm((this.a_carbon[t] / 1000) * this.c_num_of_days_SH[t] * (1 / c_hp_eff_sh[t]), x_hp_l_op_sh[t]);
+                //a_co2.AddTerm((this.a_carbon[t] / 1000) * this.c_num_of_days_DHW[t] * (1 / c_hp_eff_dhw[t]), x_hp_s_op_dhw[t]);
+                //a_co2.AddTerm((this.a_carbon[t] / 1000) * this.c_num_of_days_DHW[t] * (1 / c_hp_eff_dhw[t]), x_hp_m_op_dhw[t]);
+                //a_co2.AddTerm((this.a_carbon[t] / 1000) * this.c_num_of_days_DHW[t] * (1 / c_hp_eff_dhw[t]), x_hp_l_op_dhw[t]);
+                //a_co2.AddTerm((this.a_carbon[t] / 1000) * this.c_num_of_days_SH[t] * (1 / c_hp_eff_sh[t]), x_hp_s_op_sh[t]);
+                //a_co2.AddTerm((this.a_carbon[t] / 1000) * this.c_num_of_days_SH[t] * (1 / c_hp_eff_sh[t]), x_hp_m_op_sh[t]);
+                //a_co2.AddTerm((this.a_carbon[t] / 1000) * this.c_num_of_days_SH[t] * (1 / c_hp_eff_sh[t]), x_hp_l_op_sh[t]);
                 // co2 by natural gas
                 a_co2.AddTerm(lca_gas * this.c_num_of_days_DHW[t] * (1 / c_boi_eff_s), x_boi_s_op_dhw[t]);
                 a_co2.AddTerm(lca_gas * this.c_num_of_days_DHW[t] * (1 / c_boi_eff_m), x_boi_m_op_dhw[t]);
@@ -1073,15 +1074,16 @@ namespace UrbanFormEHub
             //_________________________________________________________________________
             ///////////////////////////////////////////////////////////////////////////
             // SOLVE and CPLEX SETTINGS
-            cpl.SetParam(Cplex.Param.ClockType, 2);     // 2 = measuring time in wall clock time. 1 = cpu time
-            cpl.SetParam(Cplex.Param.TimeLimit, 300);
-            //cpl.SetParam(Cplex.Param.MIP.Tolerances.MIPGap, 0.05);
+            //cpl.SetParam(Cplex.Param.ClockType, 1);     // 2 = measuring time in wall clock time. 1 = cpu time
+            
+            //cpl.SetParam(Cplex.DoubleParam.TiLim, 300);
+            cpl.SetParam(Cplex.Param.MIP.Tolerances.MIPGap, 0.01);
             //cpl.SetOut(null);
 
             if(!this.multithreading)
                 cpl.SetParam(Cplex.Param.Threads, 1);
 
-            cpl.Solve();
+            bool success = cpl.Solve();
 
             //Console.WriteLine("mip gap: {0}", cpl.GetMIPRelativeGap());
             //_________________________________________________________________________
@@ -1110,8 +1112,8 @@ namespace UrbanFormEHub
             //Console.WriteLine("total co2 emissions: {0}", cpl.GetValue(a_co2));
             //Console.WriteLine("tot pur: {0}, tot sold: {1}", cpl.GetValue(cpl.Sum(x_purchase)), cpl.GetValue(cpl.Sum(x_feedin)));
             //Console.ReadKey();
-
-            try
+            
+            if(success)
             {
                 if (bln_mincarbon)
                 {
@@ -1274,7 +1276,7 @@ namespace UrbanFormEHub
 
                 outs.infeasible = false;
             }
-            catch
+            else
             {
                 outs.infeasible = true;
             }

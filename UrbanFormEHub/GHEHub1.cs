@@ -63,6 +63,8 @@ namespace UrbanFormEHub
             pManager.AddBooleanParameter("minCarbon", "minCarbon", "Objective: minimize carbon, instead cost? True, if min carbon.", GH_ParamAccess.item);
             //17
             pManager.AddBooleanParameter("multithread", "multithread", "Activate multi threading? If yes, maximum available threads are used. If false, it's limited to 1 thread.", GH_ParamAccess.item);
+            //18
+            pManager.AddNumberParameter("rent", "rent", "Rent per m2", GH_ParamAccess.item);
         }
 
         /// <summary>
@@ -110,6 +112,9 @@ namespace UrbanFormEHub
             pManager.AddNumberParameter("red_sh", "red_sh", "Horizon-reduced space heating demand. 1008 hours, 6 weeks.", GH_ParamAccess.list);
             pManager.AddNumberParameter("red_dhw", "red_dhw", "Horizon-reduced domestic hot water demand. 1008 hours, 6 weeks.", GH_ParamAccess.list);
             pManager.AddNumberParameter("red_cool", "red_cool", "Horizon-reduced cooling demand. 1008 hours, 6 weeks.", GH_ParamAccess.list);
+            //23
+            pManager.AddNumberParameter("totCost", "totCost", "Total Cost, i.e. cost of energy system + -Rent*area", GH_ParamAccess.item);
+
         }
 
         /// <summary>
@@ -162,10 +167,10 @@ namespace UrbanFormEHub
             //assuming 30% of the facade can be covered with PV
             for(int i=0; i<pvarea.Count; i++)
             {
-                if(i>-1 && i<9) pvarea[i] *= 0.3;
-                if (i > 44 && i < 54) pvarea[i] *= 0.3;
-                if (i > 89 && i < 99) pvarea[i] *= 0.3;
-                if (i> 134 && i< 114) pvarea[i] *= 0.3;
+                if(i>8 && i<45) pvarea[i] *= 0.3;
+                if (i > 53 && i < 90) pvarea[i] *= 0.3;
+                if (i > 98 && i < 135) pvarea[i] *= 0.3;
+                if (i> 143) pvarea[i] *= 0.3;
             }
 
             Grasshopper.Kernel.Data.GH_Structure<Grasshopper.Kernel.Types.GH_Number> sol;
@@ -196,6 +201,9 @@ namespace UrbanFormEHub
 
             bool multithreading = true;
             if (!DA.GetData(17, ref multithreading)) { };
+
+            double rent = 65;
+            if(!DA.GetData(18, ref rent)){};
 
             if (start)
             {
@@ -292,11 +300,13 @@ namespace UrbanFormEHub
                     DA.SetDataList(21, d_dhw_red);
                     DA.SetDataList(22, d_cool_red);
 
+                    DA.SetData(23, ehub.outputs.cost + (rent * -1 * gfa));
                 }
                 else
                 {
                     DA.SetData(0, 10000000);    // penalty value. should never get so high otherwise
                     DA.SetData(1, 200);         // same
+                    DA.SetData(23, 10000000);
                 }
             }
 
