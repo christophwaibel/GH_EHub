@@ -1,0 +1,26 @@
+# ignore visual studio stuff according to https://stackoverflow.com/a/2144077/2260
+[Oo]bj
+[Bb]in
+Debug/
+Release/
+.vs/
+*.user
+*.suo
+*.[Cc]ache
+*.bak
+*.ncb
+*.log 
+*.DS_Store
+[Tt]humbs.db 
+_ReSharper.*
+*.resharper
+Ankh.NoLoad
+
+
+
+
+*.ide
+*.ide-shm
+*.ide-wal
+
+/.vs
