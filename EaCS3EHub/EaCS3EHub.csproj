@@ -67,6 +67,8 @@
     <Compile Include="EaCS3EHubInfo.cs" />
     <Compile Include="Ehub.cs" />
     <Compile Include="EhubOutputs.cs" />
+    <Compile Include="GhBuildingPackage.cs" />
+    <Compile Include="GhConversionAshp.cs" />
     <Compile Include="HorizonReduction.cs" />
     <Compile Include="Misc.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

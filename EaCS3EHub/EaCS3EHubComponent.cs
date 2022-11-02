@@ -20,9 +20,9 @@ namespace EaCS3EHub
     public class EaCS3EHubComponent : GH_Component
     {
         public EaCS3EHubComponent()
-            : base("EnergyHub EaCS3 HS2021", "EHub2021",
-                "Energy Hub component for the EaCS3 HS 2021 course at ETHZ",
-                "[hive]", "EnergyHubs")
+            : base("EnergyHub CompECD HS2022", "EHub2022",
+                "Energy Hub component for the CompECD HS 2022 course at ETHZ",
+                "EnergyHubs", "Solver")
         {
         }
 
@@ -61,6 +61,12 @@ namespace EaCS3EHub
             // 10
             pManager.AddIntegerParameter("epsilon", "epsilon", "number of epsilon cuts. Min 1, default 3", GH_ParamAccess.item, 3);
             pManager[10].Optional = true;
+
+            // 11 - 13
+            pManager.AddGenericParameter("Building Package", "Building", "Building Package, containing loads, and construction cost and emissions. " +
+                "If multiple building packages are provided, the solver will treat them as decision variable. Useful, e.g. to determine optimal retrofitting package.", GH_ParamAccess.list);
+            pManager.AddGenericParameter("Conversion Tech", "ConvTech", "Conversion Technologies considered in the ehub", GH_ParamAccess.list);
+            pManager.AddGenericParameter("Storage Tech", "StorageTech", "Storage Technologies considered in the ehub", GH_ParamAccess.list);
         }
 
 
