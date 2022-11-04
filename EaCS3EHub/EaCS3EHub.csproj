@@ -62,15 +62,39 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Clustering.cs" />
-    <Compile Include="EaCS3EHubComponent.cs" />
+    <Compile Include="Building\Building.cs" />
+    <Compile Include="Carriers\Air.cs" />
+    <Compile Include="Carriers\Biomass.cs" />
+    <Compile Include="Carriers\Carrier.cs" />
+    <Compile Include="Carriers\Electricity.cs" />
+    <Compile Include="Carriers\GhCarrierAir.cs" />
+    <Compile Include="Carriers\GhCarrierBiomass.cs" />
+    <Compile Include="Carriers\GhCarrierElectricity.cs" />
+    <Compile Include="Carriers\GhCarrierGround.cs" />
+    <Compile Include="Carriers\GhCarrierNaturalGas.cs" />
+    <Compile Include="Carriers\GhCarrierOil.cs" />
+    <Compile Include="Carriers\GhCarrierSolar.cs" />
+    <Compile Include="Carriers\Ground.cs" />
+    <Compile Include="Carriers\NaturalGas.cs" />
+    <Compile Include="Carriers\Oil.cs" />
+    <Compile Include="Carriers\Solar.cs" />
+    <Compile Include="Conversion\AirSourceHeatPump.cs" />
+    <Compile Include="Conversion\Conversion.cs" />
+    <Compile Include="Demand\Cooling.cs" />
+    <Compile Include="Demand\Demand.cs" />
+    <Compile Include="Demand\GhDemand.cs" />
+    <Compile Include="Solvers\Clustering.cs" />
+    <Compile Include="Demand\Electricity.cs" />
+    <Compile Include="Demand\Heating.cs" />
+    <Compile Include="Demand\HotWater.cs" />
+    <Compile Include="Solvers\EaCS3EHubComponent.cs" />
     <Compile Include="EaCS3EHubInfo.cs" />
-    <Compile Include="Ehub.cs" />
-    <Compile Include="EhubOutputs.cs" />
-    <Compile Include="GhBuildingPackage.cs" />
-    <Compile Include="GhCompECDEHub.cs" />
-    <Compile Include="GhConversionAshp.cs" />
-    <Compile Include="HorizonReduction.cs" />
+    <Compile Include="Solvers\Ehub.cs" />
+    <Compile Include="Solvers\EhubOutputs.cs" />
+    <Compile Include="Building\GhBuildingPackage.cs" />
+    <Compile Include="Solvers\GhCompECDEHub.cs" />
+    <Compile Include="Conversion\GhConversionAshp.cs" />
+    <Compile Include="Solvers\HorizonReduction.cs" />
     <Compile Include="Misc.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Properties\Resources.Designer.cs">

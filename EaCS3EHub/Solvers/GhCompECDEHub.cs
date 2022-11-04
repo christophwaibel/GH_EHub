@@ -14,43 +14,25 @@ namespace EaCS3EHub
         public GhCompECDEHub()
           : base("EnergyHub CompECD HS2022", "EHub2022",
                 "Energy Hub component for the CompECD HS 2022 course at ETHZ",
-                "EnergyHubs", "Solver")
+                "EnergyHubs", "Energy Hubs")
         {
         }
+        public override GH_Exposure Exposure => GH_Exposure.senary;
 
         /// <summary>
         /// Registers all the input parameters for this component.
         /// </summary>
         protected override void RegisterInputParams(GH_Component.GH_InputParamManager pManager)
         {
-            // 5, 6
-            pManager.AddNumberParameter("Solar Tech Areas", "srfs",
-                "Surface areas for solar energy system technologies (PV, ST, PVT, ...) (m^2)", GH_ParamAccess.list);
-            pManager.AddNumberParameter("Solar Potentials", "sol",
-                "Annual hourly solar potentials for each of the available surfaces (Wh)", GH_ParamAccess.tree);
+            pManager.AddGenericParameter("Building", "building", "Building inputs to the energy hub. Could be retrofitting packages. " +
+                "If more than one input is provided here, it will treat the different building inputs as decision variable (i.e., determining which building package is optimal", GH_ParamAccess.list);
+            pManager.AddGenericParameter("Conversion", "conversion", "Conversion technologies, such as PV, ASHP, CHP, ...", GH_ParamAccess.list);
+            pManager.AddGenericParameter("Storage", "storage", "Storage technologies, such as batteries, thermal energy storage, cold storage, ...", GH_ParamAccess.list);
 
-
-            // 7, 8
-            pManager.AddNumberParameter("GHI", "GHI",
-                "Global Horizontal Irradiation annual hourly timeseries from an .epw", GH_ParamAccess.list);
-            pManager.AddNumberParameter("dryBulb", "dryBulb",
-                "Dry bulb temperature annual hourly timeseries from an .epw", GH_ParamAccess.list);
-
-
-            // 11 - 13
-            pManager.AddGenericParameter("Building Package", "Building", "Building Package, containing loads, and construction cost and emissions. " +
-                "If multiple building packages are provided, the solver will treat them as decision variable. Useful, e.g. to determine optimal retrofitting package.", GH_ParamAccess.list);
-            pManager.AddGenericParameter("Conversion Tech", "ConvTech", "Conversion Technologies considered in the ehub", GH_ParamAccess.list);
-            pManager.AddGenericParameter("Storage Tech", "StorageTech", "Storage Technologies considered in the ehub", GH_ParamAccess.list);
-
-
-
-            // 9
-            // 10
-            pManager.AddIntegerParameter("epsilon", "epsilon", "number of epsilon cuts. Min 1, default 3", GH_ParamAccess.item, 3);
-            pManager[10].Optional = true;
-            pManager.AddBooleanParameter("run", "run", "run ehub", GH_ParamAccess.item);
-
+            pManager.AddIntegerParameter("Epsilon", "ε", "Number of epsilon-cuts, i.e. number of solutions between cost and carbon minimal. E.g., ε=3 will give a total of 5 solutions. Min 1, default 3.", GH_ParamAccess.item, 3);
+            pManager[3].Optional = true;
+            pManager.AddTextParameter("Folder", "folder", "Output folder path for writing results to", GH_ParamAccess.item);
+            pManager.AddBooleanParameter("Run", "run", "Run the energy hub solver.", GH_ParamAccess.item);
         }
 
         /// <summary>

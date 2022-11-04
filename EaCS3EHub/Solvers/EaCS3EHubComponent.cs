@@ -22,10 +22,11 @@ namespace EaCS3EHub
         public EaCS3EHubComponent()
             : base("EnergyHub EaCS3 HS2021", "EHub2021",
                 "Energy Hub component for the EaCS3 HS 2021 course at ETHZ",
-                "EnergyHubs", "Solver")
+                "EnergyHubs", "Energy Hubs")
         {
         }
 
+        public override GH_Exposure Exposure => GH_Exposure.senary;
 
         protected override void RegisterInputParams(GH_Component.GH_InputParamManager pManager)
         {

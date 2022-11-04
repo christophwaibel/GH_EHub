@@ -98,6 +98,9 @@ namespace EhubMisc
 
             return distance;
         }
+
+
+        public const int HoursPerYear = 8760;
     }
 
 }
