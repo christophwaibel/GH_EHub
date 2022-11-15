@@ -118,7 +118,37 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <assembly alias="System.Windows.Forms" name="System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" />
+  <data name="aircon" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\aircon.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="battery_elec" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\battery-elec.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="Boiler" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Boiler.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="Boiler_red" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Boiler-red.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="chp_color" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\chp-color.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="demand_energydemand" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\demand_energydemand.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="energysystems_heatpump_airsource" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\energysystems_heatpump_airsource.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="Heat_pump" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Heat-pump.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="IO_Building" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\IO_Building.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
   <data name="IO_Energysytems" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\IO_Energysytems.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="solar_PV" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\solar_PV.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
 </root>

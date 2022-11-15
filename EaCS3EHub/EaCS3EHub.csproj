@@ -116,6 +116,36 @@
   <ItemGroup>
     <None Include="Resources\IO_Energysytems.png" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\aircon.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\battery-elec.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Boiler-red.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\chp-color.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Heat-pump.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\demand_energydemand.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\IO_Building.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\solar_PV.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Boiler.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\energysystems_heatpump_airsource.png" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
